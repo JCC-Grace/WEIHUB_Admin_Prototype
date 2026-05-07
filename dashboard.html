@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>数据概览 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+
+  <div class="main">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-title">数据概览</div>
+      <div class="header-actions">
+        <button class="header-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          今日
+        </button>
+        <div class="header-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Root
+        </div>
+      </div>
+    </header>
+
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>数据概览</h1>
+          <div class="subtitle">2026-04-23 今日数据实时更新</div>
+        </div>
+      </div>
+
+      <!-- 今日核心指标 -->
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">今日新增用户</div>
+          <div class="stat-body">
+            <div class="stat-icon blue">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="19" y1="8" x2="19" y2="14"/><line x1="22" y1="11" x2="16" y2="11"/></svg>
+            </div>
+            <div>
+              <div class="stat-value">3</div>
+              <div class="stat-trend neutral">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                较昨日持平
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">今日请求量</div>
+          <div class="stat-body">
+            <div class="stat-icon green">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            </div>
+            <div>
+              <div class="stat-value">34</div>
+              <div class="stat-trend up">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                较昨日 +13%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">今日消耗</div>
+          <div class="stat-body">
+            <div class="stat-icon orange">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+            <div>
+              <div class="stat-value">¥0.71</div>
+              <div class="stat-trend up">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="18 15 12 9 6 15"/></svg>
+                较昨日 +8%
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="stat-card">
+          <div class="stat-label">今日活跃用户</div>
+          <div class="stat-body">
+            <div class="stat-icon purple">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            </div>
+            <div>
+              <div class="stat-value">8</div>
+              <div class="stat-trend down">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+                较昨日 -2
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 主体内容 -->
+      <div class="two-col-wide">
+        <!-- 平台累计 + 待处理事项 -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+
+          <!-- 待处理事项 -->
+          <div class="card">
+            <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>⚡ 待处理事项</span>
+              <span class="badge badge-warning">3 条</span>
+            </div>
+            <div class="alert-list">
+              <div class="alert-item">
+                <div class="alert-item-icon orange">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+                </div>
+                <div class="alert-item-body">
+                  <div class="alert-item-title">2 家企业待审核认证</div>
+                  <div class="alert-item-desc">提交时间：今日 09:12 / 昨日 18:34</div>
+                </div>
+                <a href="enterprises.html" class="btn btn-outline btn-sm">查看</a>
+              </div>
+              <div class="alert-item">
+                <div class="alert-item-icon red">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polygon points="12 2 22 21 2 21"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+                </div>
+                <div class="alert-item-body">
+                  <div class="alert-item-title">渠道「deepseek-main」余额不足</div>
+                  <div class="alert-item-desc">剩余额度低于阈值，建议及时充值</div>
+                </div>
+                <a href="channels.html" class="btn btn-outline btn-sm">查看</a>
+              </div>
+              <div class="alert-item">
+                <div class="alert-item-icon blue">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+                </div>
+                <div class="alert-item-body">
+                  <div class="alert-item-title">今日有 4 条 5xx 异常请求</div>
+                  <div class="alert-item-desc">错误率 11.8%，高于正常水平</div>
+                </div>
+                <a href="logs.html" class="btn btn-outline btn-sm">查看</a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 平台累计 -->
+          <div class="card">
+            <div class="card-title">📊 平台累计</div>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+              <div style="background:var(--bg-muted);border-radius:8px;padding:14px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">累计用户</div>
+                <div style="font-size:20px;font-weight:700;">26</div>
+              </div>
+              <div style="background:var(--bg-muted);border-radius:8px;padding:14px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">累计请求</div>
+                <div style="font-size:20px;font-weight:700;">854</div>
+              </div>
+              <div style="background:var(--bg-muted);border-radius:8px;padding:14px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">累计消耗</div>
+                <div style="font-size:20px;font-weight:700;">¥82.74</div>
+              </div>
+              <div style="background:var(--bg-muted);border-radius:8px;padding:14px;">
+                <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">活跃模型数</div>
+                <div style="font-size:20px;font-weight:700;">12</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 近期请求分布 + 近期用户 -->
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          <div class="card">
+            <div class="card-title">🔥 今日 Top 模型</div>
+            <table style="width:100%;font-size:13px;">
+              <thead>
+                <tr>
+                  <th style="text-align:left;padding:6px 0;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase;">模型</th>
+                  <th style="text-align:right;padding:6px 0;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase;">请求</th>
+                  <th style="text-align:right;padding:6px 0;font-weight:600;color:var(--text-muted);font-size:11px;text-transform:uppercase;">消耗</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr style="border-top:1px solid var(--border-light);">
+                  <td style="padding:8px 0;"><span class="font-medium">deepseek-r1</span></td>
+                  <td style="text-align:right;padding:8px 0;color:var(--text-muted);">18</td>
+                  <td style="text-align:right;padding:8px 0;font-family:monospace;font-size:12px;">¥0.42</td>
+                </tr>
+                <tr style="border-top:1px solid var(--border-light);">
+                  <td style="padding:8px 0;"><span class="font-medium">gpt-4o</span></td>
+                  <td style="text-align:right;padding:8px 0;color:var(--text-muted);">9</td>
+                  <td style="text-align:right;padding:8px 0;font-family:monospace;font-size:12px;">¥0.21</td>
+                </tr>
+                <tr style="border-top:1px solid var(--border-light);">
+                  <td style="padding:8px 0;"><span class="font-medium">claude-3-5-sonnet</span></td>
+                  <td style="text-align:right;padding:8px 0;color:var(--text-muted);">7</td>
+                  <td style="text-align:right;padding:8px 0;font-family:monospace;font-size:12px;">¥0.08</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="card">
+            <div class="card-title" style="display:flex;align-items:center;justify-content:space-between;">
+              <span>👤 最近注册用户</span>
+              <a href="users.html" class="action-link blue" style="font-size:12px;">全部 →</a>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+              <div style="display:flex;align-items:center;justify-content:space-between;">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">user@example.com</div>
+                  <div style="font-size:11px;color:var(--text-muted);">注册于 10:24</div>
+                </div>
+                <span class="badge badge-neutral">注册用户</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px;">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">partner@corp.com</div>
+                  <div style="font-size:11px;color:var(--text-muted);">注册于 昨日 22:11</div>
+                </div>
+                <span class="badge badge-primary">合作企业</span>
+              </div>
+              <div style="display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border-light);padding-top:10px;">
+                <div>
+                  <div style="font-size:13px;font-weight:500;">admin@weihub.io</div>
+                  <div style="font-size:11px;color:var(--text-muted);">注册于 昨日 15:03</div>
+                </div>
+                <span class="badge badge-info">企业用户</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+</body>
+</html>

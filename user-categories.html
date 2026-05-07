@@ -1,0 +1,21 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>用户分类 — WeiHub Admin</title><link rel="stylesheet" href="css/style.css"></head>
+<body><div class="app"><div id="sidebar-mount"></div><div class="main">
+<header class="header"><div class="header-title">用户分类</div><div class="header-actions"><div class="header-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Root</div></div></header>
+<main class="page">
+<div class="page-header"><div class="page-header-left"><h1>用户分类</h1><div class="subtitle">管理用户分类及排序，动态生成分类折扣 Tab</div></div><div class="page-header-actions"><button class="btn btn-primary" onclick="openModal('createModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>新增分类</button></div></div>
+<div class="alert alert-info"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>前三条为系统默认分类，不可删除。新增分类会自动生成对应的分类折扣记录。</div>
+<div class="table-wrap"><table><thead><tr><th>分类 Key</th><th>显示名称</th><th>描述</th><th class="text-center">排序</th><th class="text-center">用户数</th><th class="text-center">状态</th><th>操作</th></tr></thead>
+<tbody>
+<tr><td><code class="td-mono">registered</code></td><td class="td-primary">注册用户</td><td class="td-muted">默认注册用户分类</td><td class="text-center">10</td><td class="text-center">21</td><td class="text-center"><span class="badge badge-success">启用</span></td><td><span class="text-muted text-sm">系统默认</span></td></tr>
+<tr><td><code class="td-mono">company</code></td><td class="td-primary">企业用户</td><td class="td-muted">企业认证用户分类</td><td class="text-center">20</td><td class="text-center">3</td><td class="text-center"><span class="badge badge-success">启用</span></td><td><span class="text-muted text-sm">系统默认</span></td></tr>
+<tr><td><code class="td-mono">partner_company</code></td><td class="td-primary">合作企业</td><td class="td-muted">渠道合作企业用户分类</td><td class="text-center">30</td><td class="text-center">1</td><td class="text-center"><span class="badge badge-success">启用</span></td><td><span class="text-muted text-sm">系统默认</span></td></tr>
+<tr><td><code class="td-mono">sibling_unit</code></td><td class="td-primary">兄弟单位</td><td class="td-muted">内部兄弟单位用户</td><td class="text-center">40</td><td class="text-center">1</td><td class="text-center"><span class="badge badge-success">启用</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">编辑</a><a href="#" class="action-link red">删除</a></div></td></tr>
+</tbody></table></div>
+</main></div></div>
+
+<div class="modal-overlay" id="createModal" style="display:none;">
+<div class="modal"><div class="modal-header"><div><h2>新增用户分类</h2><div class="subtitle">创建后自动生成对应折扣记录</div></div><button class="modal-close" onclick="closeModal('createModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></div>
+<div class="modal-body"><div class="form-group"><label class="form-label">分类 Key（小写字母/数字/下划线）</label><input class="form-input" placeholder="如 vip_user"></div><div class="form-group"><label class="form-label">显示名称</label><input class="form-input" placeholder="如 VIP 用户"></div><div class="form-group"><label class="form-label">描述</label><input class="form-input" placeholder="可选描述"></div><div class="form-group"><label class="form-label">排序值（数字越小越靠前）</label><input class="form-input" type="number" value="50"></div></div>
+<div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('createModal')">取消</button><button class="btn btn-primary">创建</button></div></div></div>
+
+<script src="js/sidebar.js"></script><script src="js/common.js"></script></body></html>

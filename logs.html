@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>请求日志 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <header class="header">
+      <div class="header-title">请求日志</div>
+      <div class="header-actions">
+        <div class="header-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Root
+        </div>
+      </div>
+    </header>
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>请求日志</h1>
+          <div class="subtitle">实时追踪所有 API 请求，今日错误率 11.8%</div>
+        </div>
+      </div>
+
+      <!-- 今日 summary -->
+      <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);margin-bottom:16px;">
+        <div class="stat-card" style="padding:14px 16px;">
+          <div class="stat-label">今日总请求</div>
+          <div class="stat-body">
+            <div class="stat-value" style="font-size:22px;">34</div>
+          </div>
+        </div>
+        <div class="stat-card" style="padding:14px 16px;">
+          <div class="stat-label">成功 (2xx)</div>
+          <div class="stat-body">
+            <div class="stat-value" style="font-size:22px;color:var(--success);">30</div>
+          </div>
+        </div>
+        <div class="stat-card" style="padding:14px 16px;">
+          <div class="stat-label">异常 (5xx)</div>
+          <div class="stat-body">
+            <div class="stat-value" style="font-size:22px;color:var(--danger);">4</div>
+          </div>
+        </div>
+        <div class="stat-card" style="padding:14px 16px;">
+          <div class="stat-label">平均响应时间</div>
+          <div class="stat-body">
+            <div class="stat-value" style="font-size:22px;">1.2s</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" type="text" placeholder="搜索用户、模型或请求 ID…" style="width:240px;" id="searchInput">
+          <select class="select">
+            <option value="">全部状态</option>
+            <option>成功 (2xx)</option>
+            <option>客户端错误 (4xx)</option>
+            <option>服务端错误 (5xx)</option>
+          </select>
+          <select class="select">
+            <option value="">全部模型</option>
+            <option>deepseek-r1</option>
+            <option>gpt-4o</option>
+            <option>claude-3-5-sonnet</option>
+          </select>
+          <input class="input" type="date" style="width:150px;">
+        </div>
+        <div class="toolbar-right">
+          <button class="btn btn-outline">导出日志</button>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0">
+        <table class="table" id="mainTable">
+          <thead>
+            <tr>
+              <th>请求 ID</th>
+              <th>用户</th>
+              <th>模型</th>
+              <th>状态</th>
+              <th>输入 Token</th>
+              <th>输出 Token</th>
+              <th>费用</th>
+              <th>耗时</th>
+              <th>时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code style="font-size:11px;color:var(--primary);">req_a1b2c3d4</code></td>
+              <td style="font-size:12px;">user@example.com</td>
+              <td style="font-size:12px;">deepseek-r1</td>
+              <td><span class="badge badge-success">200</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">1,245</td>
+              <td style="font-size:12px;color:var(--text-muted);">834</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.042</td>
+              <td style="font-size:12px;color:var(--text-muted);">1.43s</td>
+              <td style="font-size:11px;color:var(--text-muted);">今日 10:23:44</td>
+              <td><button class="action-link blue" onclick="openModal('detailModal')">详情</button></td>
+            </tr>
+            <tr>
+              <td><code style="font-size:11px;color:var(--primary);">req_e5f6g7h8</code></td>
+              <td style="font-size:12px;">dev@corp.com</td>
+              <td style="font-size:12px;">gpt-4o</td>
+              <td><span class="badge badge-danger">500</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">523</td>
+              <td style="font-size:12px;color:var(--text-muted);">0</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.000</td>
+              <td style="font-size:12px;color:var(--text-muted);">30.0s</td>
+              <td style="font-size:11px;color:var(--text-muted);">今日 10:21:07</td>
+              <td><button class="action-link blue" onclick="openModal('detailModal')">详情</button></td>
+            </tr>
+            <tr>
+              <td><code style="font-size:11px;color:var(--primary);">req_i9j0k1l2</code></td>
+              <td style="font-size:12px;">alice@startup.io</td>
+              <td style="font-size:12px;">claude-3-5-sonnet</td>
+              <td><span class="badge badge-success">200</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">2,001</td>
+              <td style="font-size:12px;color:var(--text-muted);">1,450</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.031</td>
+              <td style="font-size:12px;color:var(--text-muted);">2.11s</td>
+              <td style="font-size:11px;color:var(--text-muted);">今日 10:18:52</td>
+              <td><button class="action-link blue" onclick="openModal('detailModal')">详情</button></td>
+            </tr>
+            <tr>
+              <td><code style="font-size:11px;color:var(--primary);">req_m3n4o5p6</code></td>
+              <td style="font-size:12px;">user@example.com</td>
+              <td style="font-size:12px;">deepseek-r1</td>
+              <td><span class="badge badge-warning">429</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">0</td>
+              <td style="font-size:12px;color:var(--text-muted);">0</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.000</td>
+              <td style="font-size:12px;color:var(--text-muted);">0.03s</td>
+              <td style="font-size:11px;color:var(--text-muted);">今日 10:15:30</td>
+              <td><button class="action-link blue" onclick="openModal('detailModal')">详情</button></td>
+            </tr>
+            <tr>
+              <td><code style="font-size:11px;color:var(--primary);">req_q7r8s9t0</code></td>
+              <td style="font-size:12px;">partner@corp.com</td>
+              <td style="font-size:12px;">gpt-4o</td>
+              <td><span class="badge badge-danger">500</span></td>
+              <td style="font-size:12px;color:var(--text-muted);">890</td>
+              <td style="font-size:12px;color:var(--text-muted);">0</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.000</td>
+              <td style="font-size:12px;color:var(--text-muted);">30.0s</td>
+              <td style="font-size:11px;color:var(--text-muted);">今日 09:58:14</td>
+              <td><button class="action-link blue" onclick="openModal('detailModal')">详情</button></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="pagination-info">共 34 条</span>
+        <div class="pagination-btns">
+          <button class="pagination-btn" disabled>上一页</button>
+          <button class="pagination-btn active">1</button>
+          <button class="pagination-btn">2</button>
+          <button class="pagination-btn">3</button>
+          <button class="pagination-btn">4</button>
+          <button class="pagination-btn">下一页</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Detail Modal -->
+<div class="modal-overlay" id="detailModal" style="display:none">
+  <div class="modal" style="max-width:620px">
+    <div class="modal-header">
+      <div class="modal-title">请求详情</div>
+      <button class="modal-close" onclick="closeModal('detailModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px;">
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">请求 ID</div>
+          <code style="font-size:12px;">req_a1b2c3d4</code>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">状态</div>
+          <span class="badge badge-success">200 OK</span>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">模型</div>
+          <div style="font-size:13px;font-weight:500;">deepseek-r1</div>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">耗时</div>
+          <div style="font-size:13px;font-weight:500;">1.43s</div>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">输入 Tokens</div>
+          <div style="font-size:13px;font-weight:500;">1,245</div>
+        </div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;">
+          <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;">输出 Tokens</div>
+          <div style="font-size:13px;font-weight:500;">834</div>
+        </div>
+      </div>
+      <div style="margin-bottom:12px;">
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">上游渠道</div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;font-size:13px;">deepseek-main → api.deepseek.com</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text-muted);margin-bottom:6px;">错误信息</div>
+        <div style="background:var(--bg-muted);border-radius:8px;padding:12px;font-size:12px;font-family:monospace;color:var(--text-muted);">—</div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('detailModal')">关闭</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.badge-danger { background: #fef2f2; color: var(--danger); }
+</style>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>initTableSearch('#searchInput','#mainTable',0);</script>
+</body>
+</html>

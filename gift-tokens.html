@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gift Token — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <header class="header">
+      <div class="header-title">Gift Token</div>
+      <div class="header-actions">
+        <div class="header-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Root
+        </div>
+      </div>
+    </header>
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Gift Token 管理</h1>
+          <div class="subtitle">创建可赠送给用户的额度 Token，用于推广或活动</div>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="openModal('createModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            创建 Token
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" type="text" placeholder="搜索 Token…" style="width:200px;" id="searchInput">
+          <select class="select">
+            <option value="">全部状态</option>
+            <option>未使用</option>
+            <option>部分使用</option>
+            <option>已用尽</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0">
+        <table class="table" id="mainTable">
+          <thead>
+            <tr>
+              <th>Token</th>
+              <th>面额</th>
+              <th>剩余</th>
+              <th>限制次数</th>
+              <th>已兑换</th>
+              <th>状态</th>
+              <th>过期时间</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code style="font-size:12px;background:var(--bg-muted);padding:2px 6px;border-radius:4px;">GT-PROMO-2024Q2</code></td>
+              <td>¥10.00</td>
+              <td style="color:var(--success);">¥10.00</td>
+              <td>50</td>
+              <td>12</td>
+              <td><span class="badge badge-success">正常</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-06-30</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-04-01</td>
+              <td>
+                <button class="action-link blue">编辑</button>
+                <button class="action-link red" onclick="openModal('confirmModal')">停用</button>
+              </td>
+            </tr>
+            <tr>
+              <td><code style="font-size:12px;background:var(--bg-muted);padding:2px 6px;border-radius:4px;">GT-ENTERPRISE-VIP</code></td>
+              <td>¥50.00</td>
+              <td style="color:var(--warning);">¥50.00</td>
+              <td>10</td>
+              <td>10</td>
+              <td><span class="badge badge-neutral">已用尽</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-12-31</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-03-15</td>
+              <td><span style="color:var(--text-muted);font-size:12px;">—</span></td>
+            </tr>
+            <tr>
+              <td><code style="font-size:12px;background:var(--bg-muted);padding:2px 6px;border-radius:4px;">GT-TRIAL-FREE</code></td>
+              <td>¥5.00</td>
+              <td style="color:var(--success);">¥5.00</td>
+              <td>100</td>
+              <td>37</td>
+              <td><span class="badge badge-success">正常</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-12-31</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-01-01</td>
+              <td>
+                <button class="action-link blue">编辑</button>
+                <button class="action-link red" onclick="openModal('confirmModal')">停用</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="pagination-info">共 3 条</span>
+        <div class="pagination-btns">
+          <button class="pagination-btn" disabled>上一页</button>
+          <button class="pagination-btn active">1</button>
+          <button class="pagination-btn" disabled>下一页</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">创建 Gift Token</div>
+      <button class="modal-close" onclick="closeModal('createModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">Token 标识</label>
+        <input class="input" type="text" placeholder="GT-活动名称">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">用于兑换的唯一标识符</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">每次兑换额度（元）</label>
+        <input class="input" type="number" placeholder="10" value="10">
+      </div>
+      <div class="form-group">
+        <label class="form-label">最大兑换次数</label>
+        <input class="input" type="number" placeholder="100">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">留空表示不限次数</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">过期时间</label>
+        <input class="input" type="date" value="2026-12-31">
+      </div>
+      <div class="form-group">
+        <label class="form-label">备注</label>
+        <input class="input" type="text" placeholder="活动说明，可选">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('createModal')">取消</button>
+      <button class="btn btn-primary">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Modal -->
+<div class="modal-overlay" id="confirmModal" style="display:none">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">确认停用</div>
+      <button class="modal-close" onclick="closeModal('confirmModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary);">停用后该 Token 将无法被兑换，已兑换的不受影响。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('confirmModal')">取消</button>
+      <button class="btn" style="background:var(--danger);color:#fff;">确认停用</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>initTableSearch('#searchInput','#mainTable',0);</script>
+</body>
+</html>

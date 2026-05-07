@@ -1,0 +1,16 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>充值订单 — WeiHub Admin</title><link rel="stylesheet" href="css/style.css"></head>
+<body><div class="app"><div id="sidebar-mount"></div><div class="main">
+<header class="header"><div class="header-title">充值订单</div><div class="header-actions"><div class="header-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Root</div></div></header>
+<main class="page">
+<div class="page-header"><div class="page-header-left"><h1>充值订单</h1><div class="subtitle">用户充值记录与对账</div></div></div>
+<div class="toolbar"><div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><input type="text" placeholder="搜索订单号、用户邮箱…"></div><select class="filter-select"><option>全部状态</option><option>已完成</option><option>待支付</option><option>已退款</option></select></div>
+<div class="table-wrap"><table><thead><tr><th>订单号</th><th>用户</th><th class="text-right">充值金额</th><th class="text-right">到账额度</th><th>支付方式</th><th>创建时间</th><th class="text-center">状态</th></tr></thead>
+<tbody>
+<tr><td class="td-mono td-muted">ORD-20260423-001</td><td class="td-muted">user001@example.com</td><td class="text-right td-mono">¥100.00</td><td class="text-right td-mono">¥100.00</td><td>支付宝</td><td class="td-muted">2026-04-23 10:22</td><td class="text-center"><span class="badge badge-success">已完成</span></td></tr>
+<tr><td class="td-mono td-muted">ORD-20260422-008</td><td class="td-muted">partner@corp.com</td><td class="text-right td-mono">¥500.00</td><td class="text-right td-mono">¥500.00</td><td>微信支付</td><td class="td-muted">2026-04-22 15:30</td><td class="text-center"><span class="badge badge-success">已完成</span></td></tr>
+<tr><td class="td-mono td-muted">ORD-20260422-003</td><td class="td-muted">test@demo.io</td><td class="text-right td-mono">¥50.00</td><td class="text-right td-mono">¥50.00</td><td>Stripe</td><td class="td-muted">2026-04-22 09:14</td><td class="text-center"><span class="badge badge-warning">待支付</span></td></tr>
+</tbody></table>
+<div class="pagination"><span>共 18 条</span><div class="pagination-pages"><button class="page-btn active">1</button></div></div>
+</div>
+</main></div></div>
+<script src="js/sidebar.js"></script><script src="js/common.js"></script></body></html>

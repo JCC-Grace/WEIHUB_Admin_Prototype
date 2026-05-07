@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Token 审计 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <header class="header">
+      <div class="header-title">Token 审计</div>
+      <div class="header-actions">
+        <div class="header-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Root
+        </div>
+      </div>
+    </header>
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>Token 审计</h1>
+          <div class="subtitle">追踪 API Token 的创建、使用与吊销历史</div>
+        </div>
+        <div class="page-header-right">
+          <button class="btn btn-primary" onclick="openModal('createModal')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            创建 Token
+          </button>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <input class="input" type="text" placeholder="搜索用户或 Token 名称…" style="width:240px;" id="searchInput">
+          <select class="select">
+            <option value="">全部状态</option>
+            <option>活跃</option>
+            <option>已过期</option>
+            <option>已吊销</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="card" style="padding:0">
+        <table class="table" id="mainTable">
+          <thead>
+            <tr>
+              <th>名称</th>
+              <th>所属用户</th>
+              <th>前缀</th>
+              <th>总请求</th>
+              <th>总消耗</th>
+              <th>状态</th>
+              <th>过期时间</th>
+              <th>创建时间</th>
+              <th>操作</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td style="font-weight:500;">生产密钥</td>
+              <td style="font-size:13px;">user@example.com</td>
+              <td><code style="font-size:11px;background:var(--bg-muted);padding:1px 5px;border-radius:3px;">sk-wh-****Ab1c</code></td>
+              <td>234</td>
+              <td style="font-family:monospace;font-size:12px;">¥5.42</td>
+              <td><span class="badge badge-success">活跃</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">永不过期</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-01-15 09:00</td>
+              <td>
+                <button class="action-link blue">详情</button>
+                <button class="action-link red" onclick="openModal('revokeModal')">吊销</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">测试密钥</td>
+              <td style="font-size:13px;">dev@corp.com</td>
+              <td><code style="font-size:11px;background:var(--bg-muted);padding:1px 5px;border-radius:3px;">sk-wh-****Xy9z</code></td>
+              <td>89</td>
+              <td style="font-family:monospace;font-size:12px;">¥1.07</td>
+              <td><span class="badge badge-success">活跃</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-12-31</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-03-01 14:20</td>
+              <td>
+                <button class="action-link blue">详情</button>
+                <button class="action-link red" onclick="openModal('revokeModal')">吊销</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">已吊销密钥</td>
+              <td style="font-size:13px;">old@company.com</td>
+              <td><code style="font-size:11px;background:var(--bg-muted);padding:1px 5px;border-radius:3px;">sk-wh-****Mn3p</code></td>
+              <td>512</td>
+              <td style="font-family:monospace;font-size:12px;">¥12.34</td>
+              <td><span class="badge badge-neutral">已吊销</span></td>
+              <td style="color:var(--text-muted);font-size:12px;">—</td>
+              <td style="color:var(--text-muted);font-size:12px;">2025-11-10 08:00</td>
+              <td>
+                <button class="action-link blue">详情</button>
+              </td>
+            </tr>
+            <tr>
+              <td style="font-weight:500;">过期密钥</td>
+              <td style="font-size:13px;">test@example.com</td>
+              <td><code style="font-size:11px;background:var(--bg-muted);padding:1px 5px;border-radius:3px;">sk-wh-****Qr7s</code></td>
+              <td>3</td>
+              <td style="font-family:monospace;font-size:12px;">¥0.02</td>
+              <td><span class="badge badge-warning">已过期</span></td>
+              <td style="color:var(--danger);font-size:12px;">2026-03-01</td>
+              <td style="color:var(--text-muted);font-size:12px;">2026-02-01 10:00</td>
+              <td>
+                <button class="action-link blue">详情</button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination">
+        <span class="pagination-info">共 4 条</span>
+        <div class="pagination-btns">
+          <button class="pagination-btn" disabled>上一页</button>
+          <button class="pagination-btn active">1</button>
+          <button class="pagination-btn" disabled>下一页</button>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<!-- Create Modal -->
+<div class="modal-overlay" id="createModal" style="display:none">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">为用户创建 Token</div>
+      <button class="modal-close" onclick="closeModal('createModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label class="form-label">所属用户</label>
+        <input class="input" type="text" placeholder="输入邮箱搜索用户">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Token 名称</label>
+        <input class="input" type="text" placeholder="如：生产密钥">
+      </div>
+      <div class="form-group">
+        <label class="form-label">过期时间（可选）</label>
+        <input class="input" type="date">
+        <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">留空表示永不过期</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">每日限额（元，可选）</label>
+        <input class="input" type="number" placeholder="留空不限">
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('createModal')">取消</button>
+      <button class="btn btn-primary">创建</button>
+    </div>
+  </div>
+</div>
+
+<!-- Revoke Confirm Modal -->
+<div class="modal-overlay" id="revokeModal" style="display:none">
+  <div class="modal" style="max-width:400px">
+    <div class="modal-header">
+      <div class="modal-title">确认吊销</div>
+      <button class="modal-close" onclick="closeModal('revokeModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary);">吊销后该 Token 将立即失效，使用该 Token 的请求将返回 401 错误。</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('revokeModal')">取消</button>
+      <button class="btn" style="background:var(--danger);color:#fff;">确认吊销</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>initTableSearch('#searchInput','#mainTable',0);</script>
+</body>
+</html>

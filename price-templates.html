@@ -1,0 +1,267 @@
+<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>标准价格模版 — WeiHub Admin</title><link rel="stylesheet" href="css/style.css">
+<style>
+/* ── Template selector cards ── */
+.tpl-cards {
+  display: grid; grid-template-columns: repeat(3,1fr); gap: 14px;
+  margin-bottom: 24px;
+}
+.tpl-card {
+  background: var(--bg); border: 1.5px solid var(--border);
+  border-radius: var(--radius); padding: 18px 20px;
+  cursor: pointer; transition: border-color .15s, box-shadow .15s;
+  position: relative; overflow: hidden;
+}
+.tpl-card:hover { border-color: #c7d2fe; box-shadow: var(--shadow); }
+.tpl-card.active {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px rgba(99,102,241,.1);
+}
+.tpl-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px;
+}
+.tpl-card.tpl-c::before  { background: linear-gradient(90deg,#6366f1,#818cf8); }
+.tpl-card.tpl-b::before  { background: linear-gradient(90deg,#8b5cf6,#a78bfa); }
+.tpl-card.tpl-r::before  { background: linear-gradient(90deg,#0ea5e9,#38bdf8); }
+.tpl-card-label {
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted); margin-bottom: 4px;
+}
+.tpl-card.active .tpl-card-label { color: var(--primary); }
+.tpl-card-name { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 6px; }
+.tpl-card-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; margin-bottom: 14px; }
+.tpl-card-stats { display: flex; gap: 16px; }
+.tpl-stat { font-size: 11px; color: var(--text-muted); }
+.tpl-stat strong { font-size: 18px; font-weight: 700; color: var(--text); display: block; line-height: 1.1; }
+.tpl-card.active .tpl-stat strong { color: var(--primary); }
+.tpl-check {
+  position: absolute; top: 14px; right: 14px;
+  width: 18px; height: 18px; border-radius: 99px;
+  background: var(--primary); display: none; align-items: center; justify-content: center;
+}
+.tpl-card.active .tpl-check { display: flex; }
+.tpl-check svg { width: 10px; height: 10px; color: #fff; }
+
+/* ── Discount badge ── */
+.disc-pill {
+  display: inline-flex; align-items: center;
+  font-size: 11px; font-weight: 700; padding: 2px 7px;
+  border-radius: 4px; white-space: nowrap;
+}
+.disc-pill.green { background: #dcfce7; color: #16a34a; }
+.disc-pill.same  { background: #f1f5f9; color: #64748b; font-weight: 400; font-style: italic; }
+.disc-pill.na    { background: #f1f5f9; color: #94a3b8; font-weight: 400; }
+
+/* ── Price cells ── */
+.price-official { font-size: 12px; color: var(--text-muted); }
+.price-tpl { font-size: 13px; font-weight: 600; color: var(--text); }
+
+/* ── Section label row ── */
+.section-row td {
+  background: var(--bg-muted); padding: 5px 16px 4px;
+  font-size: 10px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--text-muted);
+  border-bottom: none !important;
+}
+</style>
+</head>
+<body><div class="app"><div id="sidebar-mount"></div><div class="main">
+<header class="header">
+  <div class="header-title">标准价格模版</div>
+  <div class="header-actions">
+    <div class="header-tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Root
+    </div>
+  </div>
+</header>
+<main class="page">
+
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>标准价格模版</h1>
+    <div class="subtitle">系统预置三套通用模版，价格由成本区间规则自动计算，只读</div>
+  </div>
+</div>
+
+<!-- tabs (future-proof) -->
+<div class="tabs" style="margin-bottom:20px;">
+  <button class="tab-btn active">标准价格模版</button>
+</div>
+
+<!-- Template selector cards -->
+<div class="tpl-cards">
+
+  <div class="tpl-card tpl-c active" data-tpl="c" onclick="selectTpl('c')">
+    <div class="tpl-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="tpl-card-label">C端</div>
+    <div class="tpl-card-name">普通注册用户</div>
+    <div class="tpl-card-desc">适用于所有注册用户的标准零售定价</div>
+    <div class="tpl-card-stats">
+      <div class="tpl-stat"><strong>8</strong>模型</div>
+      <div class="tpl-stat"><strong>80–100%</strong>官网折扣区间</div>
+    </div>
+  </div>
+
+  <div class="tpl-card tpl-b" data-tpl="b" onclick="selectTpl('b')">
+    <div class="tpl-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="tpl-card-label">B端</div>
+    <div class="tpl-card-name">企业用户</div>
+    <div class="tpl-card-desc">适用于企业客户的批发定价，低于C端</div>
+    <div class="tpl-card-stats">
+      <div class="tpl-stat"><strong>8</strong>模型</div>
+      <div class="tpl-stat"><strong>70–100%</strong>官网折扣区间</div>
+    </div>
+  </div>
+
+  <div class="tpl-card tpl-r" data-tpl="r" onclick="selectTpl('r')">
+    <div class="tpl-check"><svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 6l3 3 5-5" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+    <div class="tpl-card-label">代理商</div>
+    <div class="tpl-card-name">渠道代理</div>
+    <div class="tpl-card-desc">适用于代理商的拿货价，自行加价出售</div>
+    <div class="tpl-card-stats">
+      <div class="tpl-stat"><strong>8</strong>模型</div>
+      <div class="tpl-stat"><strong>60–100%</strong>官网折扣区间</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Search bar -->
+<div class="toolbar" style="margin-bottom:16px;">
+  <div class="search-input">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+    <input type="text" id="searchInput" placeholder="搜索模型名称或供应商…" oninput="filterTable()">
+  </div>
+</div>
+
+<!-- Pricing table -->
+<div class="table-wrap">
+  <table id="priceTable">
+    <thead>
+      <tr>
+        <th>模型</th>
+        <th>供应商</th>
+        <th>计费类型</th>
+        <th>官网原价（输入）</th>
+        <th>官网原价（输出）</th>
+        <th id="th-tpl-in">本模版售价（输入）</th>
+        <th id="th-tpl-out">本模版售价（输出）</th>
+        <th>折扣率</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+</main></div></div>
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>
+
+// ── Model data ────────────────────────────────────────────────
+// Fields: name, id, vendor, billingType, officialIn, officialOut (per 1M tokens / per image / per second), costRate
+// costRate: actual purchase rate as % of official price
+const MODELS = [
+  // ≤3.5折 bracket → C:80% B:70% R:60%
+  { name:'Qwen3-Max',       id:'qwen3-max',        vendor:'阿里云', billing:'text/token',   officialIn:2.5,  officialOut:10,  costRate:0.35, note:'0–32K' },
+  { name:'Qwen3.5-Plus',    id:'qwen3.5-plus',     vendor:'阿里云', billing:'text/token',   officialIn:0.8,  officialOut:4.8, costRate:0.35, note:'0–128K' },
+  { name:'Qwen3-235B-A22B', id:'qwen3-235b',       vendor:'阿里云', billing:'text/token',   officialIn:2.0,  officialOut:8.0, costRate:0.35, note:'非思考' },
+  { name:'Qwen3-14B',       id:'qwen3-14b',        vendor:'阿里云', billing:'text/token',   officialIn:1.0,  officialOut:4.0, costRate:0.35, note:'非思考' },
+  // 5–6折 bracket → C:90% B:80% R:70%
+  { name:'DeepSeek-V3.2',   id:'deepseek-v3',      vendor:'DeepSeek', billing:'text/token', officialIn:2.0,  officialOut:3.0, costRate:0.60, note:'标准调用' },
+  // 原价 bracket → C:100% B:100% R:—
+  { name:'GLM-5',           id:'glm-5',            vendor:'智谱',   billing:'text/token',   officialIn:4.0,  officialOut:18,  costRate:1.00, note:'0–32K' },
+  { name:'Kimi-K2.6',       id:'kimi-k2.6',        vendor:'月之暗面', billing:'text/token', officialIn:6.5,  officialOut:27,  costRate:1.00, note:'0–256K' },
+  { name:'Wan2.6-Image',    id:'wan2.6-image',      vendor:'阿里云', billing:'image/image',  officialIn:0.20, officialOut:null,costRate:0.35, note:'按张计费' },
+];
+
+// ── Pricing rules by cost bracket ─────────────────────────────
+function getBracket(rate) {
+  if (rate <= 0.35) return { label:'≤3.5折', c:0.80, b:0.70, r:0.60 };
+  if (rate <= 0.45) return { label:'3.5–4.5折', c:0.85, b:0.75, r:0.65 };
+  if (rate <= 0.60) return { label:'4.5–6折', c:0.90, b:0.80, r:0.70 };
+  if (rate <= 0.70) return { label:'6–7折', c:0.90, b:0.85, r:0.80 };
+  if (rate <= 0.80) return { label:'7–8折', c:0.95, b:0.90, r:0.85 };
+  if (rate <= 0.90) return { label:'8–9折', c:0.95, b:0.90, r:0.90 };
+  return { label:'原价', c:1.00, b:1.00, r:null };
+}
+
+function fmt(val) {
+  if (val === null || val === undefined) return '—';
+  return '¥' + (val % 1 === 0 ? val.toFixed(0) : val % 0.1 === 0 ? val.toFixed(1) : val.toFixed(2));
+}
+
+function discPill(ratio, isReseller) {
+  if (isReseller && ratio === null) return '<span class="disc-pill na">不开放</span>';
+  if (ratio === 1.00) return '<span class="disc-pill same">同官网</span>';
+  const pct = Math.round((1 - ratio) * 100);
+  return `<span class="disc-pill green">-${pct}%</span>`;
+}
+
+// Group models by vendor for section rows
+const VENDOR_ORDER = ['阿里云','DeepSeek','智谱','月之暗面'];
+
+let currentTpl = 'c';
+
+function renderTable() {
+  const tpl = currentTpl;
+  const body = document.getElementById('tableBody');
+  const query = document.getElementById('searchInput').value.toLowerCase();
+
+  const filtered = MODELS.filter(m =>
+    m.name.toLowerCase().includes(query) ||
+    m.vendor.toLowerCase().includes(query) ||
+    m.id.toLowerCase().includes(query)
+  );
+
+  // Group by vendor
+  const grouped = {};
+  filtered.forEach(m => {
+    if (!grouped[m.vendor]) grouped[m.vendor] = [];
+    grouped[m.vendor].push(m);
+  });
+
+  let html = '';
+  VENDOR_ORDER.forEach(vendor => {
+    if (!grouped[vendor]) return;
+    html += `<tr class="section-row"><td colspan="8">${vendor}</td></tr>`;
+    grouped[vendor].forEach(m => {
+      const br = getBracket(m.costRate);
+      const ratio = br[tpl];
+      const isReseller = tpl === 'r';
+      const tplIn = (ratio !== null) ? m.officialIn * ratio : null;
+      const tplOut = (m.officialOut !== null && ratio !== null) ? m.officialOut * ratio : null;
+
+      html += `<tr>
+        <td><div class="td-primary">${m.name}</div><div class="td-muted td-mono">${m.id}${m.note ? ' · ' + m.note : ''}</div></td>
+        <td>${m.vendor}</td>
+        <td><div>${m.billing.split('/')[0]}</div><div class="td-muted">${m.billing.split('/')[1]}</div></td>
+        <td><div class="price-official">${fmt(m.officialIn)}</div></td>
+        <td><div class="price-official">${m.officialOut !== null ? fmt(m.officialOut) : '—'}</div></td>
+        <td><div class="price-tpl">${fmt(tplIn)}</div></td>
+        <td><div class="price-tpl">${m.officialOut !== null ? fmt(tplOut) : '—'}</div></td>
+        <td>${discPill(ratio, isReseller)}</td>
+      </tr>`;
+    });
+  });
+
+  body.innerHTML = html || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">无匹配模型</td></tr>';
+}
+
+function selectTpl(tpl) {
+  currentTpl = tpl;
+  document.querySelectorAll('.tpl-card').forEach(c => c.classList.remove('active'));
+  document.querySelector(`.tpl-card[data-tpl="${tpl}"]`).classList.add('active');
+
+  const labels = { c:'C端', b:'B端', r:'代理商' };
+  document.getElementById('th-tpl-in').textContent  = `${labels[tpl]} 售价（输入）`;
+  document.getElementById('th-tpl-out').textContent = `${labels[tpl]} 售价（输出）`;
+  renderTable();
+}
+
+function filterTable() { renderTable(); }
+
+// Init
+renderTable();
+</script>
+</body></html>

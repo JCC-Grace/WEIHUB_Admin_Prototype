@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>系统设置 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <header class="header">
+      <div class="header-title">系统设置</div>
+      <div class="header-actions">
+        <div class="header-tag">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Root
+        </div>
+      </div>
+    </header>
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left">
+          <h1>系统设置</h1>
+          <div class="subtitle">配置平台基本参数和运行时选项</div>
+        </div>
+      </div>
+
+      <!-- Tab bar -->
+      <div class="tabs tab-scope">
+        <button class="tab-btn active" data-tab="general">基础配置</button>
+        <button class="tab-btn" data-tab="billing">计费配置</button>
+        <button class="tab-btn" data-tab="register">注册与安全</button>
+        <button class="tab-btn" data-tab="notify">通知配置</button>
+        <button class="tab-btn" data-tab="advanced">高级</button>
+      </div>
+
+      <!-- General -->
+      <div data-tab-panel="general">
+        <div class="card">
+          <div class="card-title">平台信息</div>
+          <div class="form-group">
+            <label class="form-label">平台名称</label>
+            <input class="input" type="text" value="WeiHub" style="max-width:320px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">平台 Logo URL</label>
+            <input class="input" type="url" placeholder="https://…" style="max-width:480px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">平台简介</label>
+            <textarea class="input" rows="3" style="max-width:480px;resize:vertical;">统一 AI 模型接入平台，为企业和个人提供高性价比的 API 服务。</textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">联系邮箱</label>
+            <input class="input" type="email" value="support@weihub.io" style="max-width:320px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">用户端配置</div>
+          <div class="form-group">
+            <label class="form-label">用户端地址</label>
+            <input class="input" type="url" value="https://portal.weihub.io" style="max-width:360px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">用于邮件中的链接拼接</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">API 基础地址</label>
+            <input class="input" type="url" value="https://api.weihub.io" style="max-width:360px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Billing -->
+      <div data-tab-panel="billing" style="display:none">
+        <div class="card">
+          <div class="card-title">计费参数</div>
+          <div class="form-group">
+            <label class="form-label">单位汇率（1 美元 = ? 内部单位）</label>
+            <input class="input" type="number" value="1000000" style="max-width:200px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">默认 1,000,000，修改后影响所有价格计算</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">新用户注册赠送额度（元）</label>
+            <input class="input" type="number" value="0" style="max-width:200px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">填 0 表示不赠送</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">余额不足预警阈值（元）</label>
+            <input class="input" type="number" value="10" style="max-width:200px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">渠道余额预警</div>
+          <div class="form-group">
+            <label class="form-label">渠道余额低于此值时触发告警（元）</label>
+            <input class="input" type="number" value="50" style="max-width:200px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Register & Security -->
+      <div data-tab-panel="register" style="display:none">
+        <div class="card">
+          <div class="card-title">注册设置</div>
+          <div class="form-group">
+            <label class="form-label">允许新用户注册</label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+              <input type="checkbox" id="allowRegister" checked style="width:16px;height:16px;cursor:pointer;">
+              <label for="allowRegister" style="font-size:13px;cursor:pointer;">开启</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">邮箱域名白名单</label>
+            <textarea class="input" rows="4" placeholder="每行一个域名，如：&#10;corp.com&#10;startup.io&#10;留空表示不限制" style="max-width:360px;resize:vertical;font-family:monospace;font-size:12px;"></textarea>
+          </div>
+          <div class="form-group">
+            <label class="form-label">邮箱验证</label>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:4px;">
+              <input type="checkbox" id="requireVerify" checked style="width:16px;height:16px;cursor:pointer;">
+              <label for="requireVerify" style="font-size:13px;cursor:pointer;">注册后需验证邮箱</label>
+            </div>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">登录安全</div>
+          <div class="form-group">
+            <label class="form-label">登录失败锁定次数</label>
+            <input class="input" type="number" value="5" style="max-width:120px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">锁定时长（分钟）</label>
+            <input class="input" type="number" value="30" style="max-width:120px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Session 超时（小时）</label>
+            <input class="input" type="number" value="24" style="max-width:120px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Notify -->
+      <div data-tab-panel="notify" style="display:none">
+        <div class="card">
+          <div class="card-title">SMTP 邮件配置</div>
+          <div class="form-group">
+            <label class="form-label">SMTP 服务器</label>
+            <input class="input" type="text" placeholder="smtp.example.com" style="max-width:320px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">SMTP 端口</label>
+            <input class="input" type="number" value="465" style="max-width:120px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">发件账号</label>
+            <input class="input" type="email" placeholder="noreply@weihub.io" style="max-width:320px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">发件密码 / App Token</label>
+            <input class="input" type="password" placeholder="••••••••" style="max-width:320px;">
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-outline">发送测试邮件</button>
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Webhook 告警</div>
+          <div class="form-group">
+            <label class="form-label">Webhook URL（可选）</label>
+            <input class="input" type="url" placeholder="https://…" style="max-width:480px;">
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">当渠道余额不足、错误率超阈值时推送</div>
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced -->
+      <div data-tab-panel="advanced" style="display:none">
+        <div class="card">
+          <div class="card-title">数据保留</div>
+          <div class="form-group">
+            <label class="form-label">请求日志保留天数</label>
+            <input class="input" type="number" value="90" style="max-width:120px;">
+          </div>
+          <div class="form-group">
+            <label class="form-label">余额变动记录保留天数</label>
+            <input class="input" type="number" value="365" style="max-width:120px;">
+          </div>
+          <div style="margin-top:8px;">
+            <button class="btn btn-primary">保存</button>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title" style="color:var(--danger);">危险操作</div>
+          <p style="font-size:13px;color:var(--text-secondary);margin:0 0 16px;">以下操作不可恢复，请谨慎执行。</p>
+          <div style="display:flex;flex-direction:column;gap:12px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg-muted);border-radius:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:500;">清空请求日志</div>
+                <div style="font-size:12px;color:var(--text-muted);">删除所有历史请求记录</div>
+              </div>
+              <button class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);" onclick="openModal('dangerModal')">执行</button>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:var(--bg-muted);border-radius:8px;">
+              <div>
+                <div style="font-size:13px;font-weight:500;">重置平台配置</div>
+                <div style="font-size:12px;color:var(--text-muted);">恢复所有设置到出厂默认值</div>
+              </div>
+              <button class="btn btn-outline" style="border-color:var(--danger);color:var(--danger);" onclick="openModal('dangerModal')">执行</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Danger Confirm Modal -->
+<div class="modal-overlay" id="dangerModal" style="display:none">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header">
+      <div class="modal-title" style="color:var(--danger);">⚠️ 确认危险操作</div>
+      <button class="modal-close" onclick="closeModal('dangerModal')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <p style="color:var(--text-secondary);">此操作不可恢复，请输入 <code style="background:var(--bg-muted);padding:1px 5px;border-radius:3px;">CONFIRM</code> 以继续。</p>
+      <input class="input" type="text" placeholder="输入 CONFIRM" style="margin-top:8px;">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('dangerModal')">取消</button>
+      <button class="btn" style="background:var(--danger);color:#fff;">确认执行</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+</body>
+</html>

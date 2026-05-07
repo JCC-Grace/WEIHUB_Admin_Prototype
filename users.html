@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>用户管理 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="app">
+  <div id="sidebar-mount"></div>
+  <div class="main">
+    <header class="header">
+      <div class="header-title">用户管理</div>
+      <div class="header-actions"><div class="header-tag"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Root</div></div>
+    </header>
+    <main class="page">
+      <div class="page-header">
+        <div class="page-header-left"><h1>用户管理</h1><div class="subtitle">共 26 位用户</div></div>
+      </div>
+      <div class="toolbar">
+        <div class="search-input">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          <input type="text" placeholder="搜索用户邮箱、ID…" id="userSearch">
+        </div>
+        <select class="filter-select">
+          <option>全部分类</option>
+          <option>注册用户</option>
+          <option>企业用户</option>
+          <option>合作企业</option>
+          <option>兄弟单位</option>
+        </select>
+        <select class="filter-select">
+          <option>全部状态</option>
+          <option>正常</option>
+          <option>禁用</option>
+        </select>
+      </div>
+      <div class="table-wrap">
+        <table id="usersTable">
+          <thead><tr>
+            <th>用户</th><th>分类</th><th>余额</th><th>累计消耗</th><th>请求数</th><th>注册时间</th><th class="text-center">状态</th><th>操作</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><div class="td-primary">user001@example.com</div><div class="td-muted td-mono">#1001</div></td><td><span class="badge badge-neutral">注册用户</span></td><td class="td-mono">¥48.50</td><td class="td-mono">¥12.30</td><td>234</td><td class="td-muted">2026-01-10 09:22</td><td class="text-center"><span class="badge badge-success">正常</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">详情</a><a href="#" class="action-link orange">充值</a><a href="#" class="action-link red">禁用</a></div></td></tr>
+            <tr><td><div class="td-primary">partner@corp.com</div><div class="td-muted td-mono">#1002</div></td><td><span class="badge badge-primary">合作企业</span></td><td class="td-mono">¥200.00</td><td class="td-mono">¥54.20</td><td>812</td><td class="td-muted">2026-01-15 14:11</td><td class="text-center"><span class="badge badge-success">正常</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">详情</a><a href="#" class="action-link orange">充值</a><a href="#" class="action-link red">禁用</a></div></td></tr>
+            <tr><td><div class="td-primary">enterprise@weico.com</div><div class="td-muted td-mono">#1003</div></td><td><span class="badge badge-info">企业用户</span></td><td class="td-mono">¥0.00</td><td class="td-mono">¥8.90</td><td>67</td><td class="td-muted">2026-02-03 11:30</td><td class="text-center"><span class="badge badge-warning">余额低</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">详情</a><a href="#" class="action-link orange">充值</a><a href="#" class="action-link red">禁用</a></div></td></tr>
+            <tr><td><div class="td-primary">test@demo.io</div><div class="td-muted td-mono">#1004</div></td><td><span class="badge badge-neutral">注册用户</span></td><td class="td-mono">¥10.00</td><td class="td-mono">¥1.20</td><td>18</td><td class="td-muted">2026-03-22 08:05</td><td class="text-center"><span class="badge badge-neutral">禁用</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">详情</a><a href="#" class="action-link green">启用</a></div></td></tr>
+            <tr><td><div class="td-primary">sibling@gov.cn</div><div class="td-muted td-mono">#1005</div></td><td><span class="badge badge-warning">兄弟单位</span></td><td class="td-mono">¥500.00</td><td class="td-mono">¥102.40</td><td>1204</td><td class="td-muted">2026-01-08 16:44</td><td class="text-center"><span class="badge badge-success">正常</span></td><td><div class="flex gap-2"><a href="#" class="action-link blue">详情</a><a href="#" class="action-link orange">充值</a><a href="#" class="action-link red">禁用</a></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <span>共 26 条，每页 20 条</span>
+          <div class="pagination-pages">
+            <button class="page-btn active">1</button>
+            <button class="page-btn">2</button>
+            <button class="page-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>initTableSearch('#userSearch','#usersTable');</script>
+</body></html>
