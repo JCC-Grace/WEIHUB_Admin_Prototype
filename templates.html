@@ -376,11 +376,13 @@
             <tr>
               <th>模型</th>
               <th>计费</th>
+              <th>官网原价·输入</th>
+              <th>官网原价·输出</th>
               <th>标准价·输入</th>
               <th>标准价·输出</th>
               <th>本模版·输入</th>
               <th>本模版·输出</th>
-              <th>折扣</th>
+              <th>综合折扣</th>
             </tr>
           </thead>
           <tbody id="drawerBody"></tbody>
@@ -565,28 +567,28 @@ function openDrawer(id) {
   let html = '';
   VENDOR_ORDER.forEach(vendor => {
     if (!grouped[vendor]) return;
-    html += `<tr class="vendor-row"><td colspan="7">${vendor}</td></tr>`;
+    html += `<tr class="vendor-row"><td colspan="9">${vendor}</td></tr>`;
     grouped[vendor].forEach(m => {
       const br = getBracket(m.costRate);
       const baseRatio = br[tier];
-      const baseIn = m.officialIn * baseRatio;
+      const baseIn  = m.officialIn  * baseRatio;
       const baseOut = m.officialOut !== null ? m.officialOut * baseRatio : null;
-      const tplIn = baseIn * ratio;
-      const tplOut = baseOut !== null ? baseOut * ratio : null;
-      const discPct = Math.round((1 - ratio) * 100);
+      const tplIn   = baseIn  * ratio;
+      const tplOut  = baseOut !== null ? baseOut * ratio : null;
+      const effPct  = Math.round(baseRatio * ratio * 100);
       html += `<tr>
         <td>
           <div class="p-name">${m.name}</div>
           <div class="p-id">${m.id}</div>
         </td>
         <td><div>${m.billing.split('/')[0]}</div><div style="font-size:10px;color:var(--text-muted)">${m.billing.split('/')[1]}</div></td>
+        <td><span class="p-base">${fmt(m.officialIn)}</span></td>
+        <td><span class="p-base">${m.officialOut !== null ? fmt(m.officialOut) : '—'}</span></td>
         <td><span class="p-base">${fmt(baseIn)}</span></td>
         <td><span class="p-base">${fmt(baseOut)}</span></td>
         <td><span class="p-tpl">${fmt(tplIn)}</span></td>
         <td><span class="p-tpl">${fmt(tplOut)}</span></td>
-        <td>${discPct > 0
-          ? `<span class="p-disc-pill">-${discPct}%</span>`
-          : `<span class="p-disc-same">同标准</span>`}</td>
+        <td><span class="p-disc-pill">${effPct}% 官网</span></td>
       </tr>`;
     });
   });
