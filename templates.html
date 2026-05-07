@@ -262,7 +262,7 @@
         <th>模版名称</th>
         <th>客户类型</th>
         <th>额外折扣</th>
-        <th>关联客户</th>
+        <th>关联客户数</th>
         <th>创建时间</th>
         <th class="text-center">状态</th>
         <th>操作</th>
@@ -431,11 +431,10 @@ function fmt(v) {
 
 // ── Templates data ──────────────────────────────────────────
 let TEMPLATES = [
-  { id:1, name:'字节跳动专属',     type:'b', discount:95, customer:'字节跳动有限公司',       note:'2026 年度合同', status:'active',   createdAt:'2026-03-15' },
-  { id:2, name:'腾讯云合作方案',   type:'b', discount:92, customer:'腾讯云计算（北京）有限责任公司', note:'',            status:'active',   createdAt:'2026-04-02' },
-  { id:3, name:'代理商A · 方案1', type:'r', discount:90, customer:'北京某科技代理商',         note:'面向小型企业',  status:'active',   createdAt:'2026-04-10' },
-  { id:4, name:'代理商A · 方案2', type:'r', discount:85, customer:'北京某科技代理商',         note:'面向中型企业',  status:'active',   createdAt:'2026-04-10' },
-  { id:5, name:'老客户续约优惠',   type:'b', discount:98, customer:'',                       note:'历史合同续期',  status:'archived', createdAt:'2026-01-20' },
+  { id:1, name:'字节跳动专属',     type:'b', discount:95, customers:['字节跳动有限公司'],                                   note:'2026 年度合同', status:'active', createdAt:'2026-03-15' },
+  { id:2, name:'腾讯云合作方案',   type:'b', discount:92, customers:['腾讯云计算（北京）有限责任公司','腾讯音乐娱乐集团'],   note:'',              status:'active', createdAt:'2026-04-02' },
+  { id:3, name:'代理商A · 方案1', type:'r', discount:90, customers:['北京某科技代理商'],                                    note:'面向小型企业',  status:'active', createdAt:'2026-04-10' },
+  { id:4, name:'代理商A · 方案2', type:'r', discount:85, customers:['北京某科技代理商','上海数聚信息技术有限公司'],          note:'面向中型企业',  status:'active', createdAt:'2026-04-10' },
 ];
 let nextId = 6;
 
@@ -459,8 +458,8 @@ function renderList() {
   updateCounts();
   const q = document.getElementById('searchInput').value.toLowerCase();
   const rows = TEMPLATES.filter(t =>
-    t.type === currentTab &&
-    (t.name.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q))
+    t.type === currentTab && t.status === 'active' &&
+    (t.name.toLowerCase().includes(q) || t.customers.some(c => c.toLowerCase().includes(q)))
   );
   const tbody = document.getElementById('listBody');
   if (!rows.length) {
@@ -479,7 +478,7 @@ function renderList() {
         <div class="disc-num">${t.discount}%</div>
         <div class="disc-sub">${t.discount < 100 ? '额外 ' + (100 - t.discount) + '% 优惠' : '同标准价'}</div>
       </td>
-      <td><span style="font-size:13px;color:var(--text-secondary)">${t.customer || '—'}</span></td>
+      <td><span style="font-size:13px;font-weight:600;color:var(--text)">${t.customers.length}</span><span style="font-size:11px;color:var(--text-muted);margin-left:3px;">家</span></td>
       <td><span style="font-size:12px;color:var(--text-muted)">${t.createdAt}</span></td>
       <td class="text-center">
         ${t.status === 'active'
@@ -529,7 +528,7 @@ function submitCreate() {
     name,
     type: selectedType,
     discount,
-    customer: document.getElementById('fCustomer').value.trim(),
+    customers: document.getElementById('fCustomer').value.trim() ? [document.getElementById('fCustomer').value.trim()] : [],
     note: document.getElementById('fNote').value.trim(),
     status: 'active',
     createdAt: new Date().toISOString().slice(0,10),
@@ -551,7 +550,7 @@ function openDrawer(id) {
   document.getElementById('dStatusBadge').innerHTML = t.status === 'active'
     ? '<span class="badge badge-success">生效</span>'
     : '<span class="badge badge-neutral">已归档</span>';
-  document.getElementById('dCustomer').textContent = t.customer || '';
+  document.getElementById('dCustomer').textContent = t.customers.length ? t.customers.join('、') : '';
   document.getElementById('dDiscount').textContent = t.discount + '%';
   document.getElementById('dBase').textContent = t.type === 'b' ? '标准 B端模版' : '标准代理商模版';
   document.getElementById('dCreated').textContent = t.createdAt;
