@@ -382,6 +382,7 @@
               <th>标准价·输出</th>
               <th>本模版·输入</th>
               <th>本模版·输出</th>
+              <th>标准折扣</th>
               <th>综合折扣</th>
             </tr>
           </thead>
@@ -567,7 +568,7 @@ function openDrawer(id) {
   let html = '';
   VENDOR_ORDER.forEach(vendor => {
     if (!grouped[vendor]) return;
-    html += `<tr class="vendor-row"><td colspan="9">${vendor}</td></tr>`;
+    html += `<tr class="vendor-row"><td colspan="10">${vendor}</td></tr>`;
     grouped[vendor].forEach(m => {
       const br = getBracket(m.costRate);
       const baseRatio = br[tier];
@@ -575,6 +576,7 @@ function openDrawer(id) {
       const baseOut = m.officialOut !== null ? m.officialOut * baseRatio : null;
       const tplIn   = baseIn  * ratio;
       const tplOut  = baseOut !== null ? baseOut * ratio : null;
+      const basePct = Math.round(baseRatio * 100);
       const effPct  = Math.round(baseRatio * ratio * 100);
       html += `<tr>
         <td>
@@ -588,6 +590,7 @@ function openDrawer(id) {
         <td><span class="p-base">${fmt(baseOut)}</span></td>
         <td><span class="p-tpl">${fmt(tplIn)}</span></td>
         <td><span class="p-tpl">${fmt(tplOut)}</span></td>
+        <td><span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${basePct}% 官网</span></td>
         <td><span class="p-disc-pill">${effPct}% 官网</span></td>
       </tr>`;
     });
