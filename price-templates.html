@@ -67,6 +67,19 @@ tbody tr:hover td.col-official { background: #f5eeff; }
   text-transform: uppercase; color: var(--text-muted);
   border-bottom: none !important;
 }
+
+/* ── Multi-tier row borders ──
+   tier-mid: intermediate rows, suppress bottom border
+   tier-last: final row of a model group, keep normal border          */
+tr.tier-mid  td { border-bottom: none !important; }
+tr.tier-last td { border-bottom: 1px solid var(--border-light) !important; }
+
+/* rowspan cells (model / vendor / billing / discount) */
+td.rs-cell { vertical-align: middle !important; }
+
+/* ── Tier condition cell ── */
+.tier-label { font-size: 12px; font-weight: 600; color: var(--text); }
+.tier-cond  { font-size: 11px; color: var(--text-muted); font-family: monospace; margin-top: 2px; }
 </style>
 </head>
 <body><div class="app"><div id="sidebar-mount"></div><div class="main">
@@ -139,6 +152,7 @@ tbody tr:hover td.col-official { background: #f5eeff; }
         <th>模型</th>
         <th>供应商</th>
         <th>计费类型</th>
+        <th>阶梯条件</th>
         <th class="col-official">官网原价（输入）</th>
         <th class="col-official">官网原价（输出）</th>
         <th id="th-tpl-in">本模版售价（输入）</th>
@@ -155,32 +169,79 @@ tbody tr:hover td.col-official { background: #f5eeff; }
 <script src="js/common.js"></script>
 <script>
 
-// ── Model data ────────────────────────────────────────────────
-// Fields: name, id, vendor, billingType, officialIn, officialOut (per 1M tokens / per image / per second), costRate
-// costRate: actual purchase rate as % of official price
+// ── Model data ─────────────────────────────────────────────────────────────
+// Each model has tiers[]. Single-tier models behave identically to the old flat row.
+// tier fields: label, condition, officialIn, officialOut (null = no output price)
 const MODELS = [
-  // ≤3.5折 bracket → C:80% B:70% R:60%
-  { name:'Qwen3-Max',       id:'qwen3-max',        vendor:'阿里云', billing:'text/token',   officialIn:2.5,  officialOut:10,  costRate:0.35, note:'0–32K' },
-  { name:'Qwen3.5-Plus',    id:'qwen3.5-plus',     vendor:'阿里云', billing:'text/token',   officialIn:0.8,  officialOut:4.8, costRate:0.35, note:'0–128K' },
-  { name:'Qwen3-235B-A22B', id:'qwen3-235b',       vendor:'阿里云', billing:'text/token',   officialIn:2.0,  officialOut:8.0, costRate:0.35, note:'非思考' },
-  { name:'Qwen3-14B',       id:'qwen3-14b',        vendor:'阿里云', billing:'text/token',   officialIn:1.0,  officialOut:4.0, costRate:0.35, note:'非思考' },
-  // 5–6折 bracket → C:90% B:80% R:70%
-  { name:'DeepSeek-V3.2',   id:'deepseek-v3',      vendor:'DeepSeek', billing:'text/token', officialIn:2.0,  officialOut:3.0, costRate:0.60, note:'标准调用' },
-  // 原价 bracket → C:100% B:100% R:—
-  { name:'GLM-5',           id:'glm-5',            vendor:'智谱',   billing:'text/token',   officialIn:4.0,  officialOut:18,  costRate:1.00, note:'0–32K' },
-  { name:'Kimi-K2.6',       id:'kimi-k2.6',        vendor:'月之暗面', billing:'text/token', officialIn:6.5,  officialOut:27,  costRate:1.00, note:'0–256K' },
-  { name:'Wan2.6-Image',    id:'wan2.6-image',      vendor:'阿里云', billing:'image/image',  officialIn:0.20, officialOut:null,costRate:0.35, note:'按张计费' },
+
+  // ── 阿里云 ── ≤3.5折 bracket → C:80% B:70% R:60%
+  {
+    name:'Qwen3-Max', id:'qwen3-max', vendor:'阿里云', billing:'text/token', costRate:0.35,
+    tiers:[
+      { label:'0–32K',    condition:'输入 ≤ 32K tokens',  officialIn:2.5, officialOut:10  },
+      { label:'32K–128K', condition:'输入 ≤ 128K tokens', officialIn:3.5, officialOut:14  },
+    ]
+  },
+  {
+    name:'Qwen3.5-Plus', id:'qwen3.5-plus', vendor:'阿里云', billing:'text/token', costRate:0.35,
+    tiers:[
+      { label:'全量', condition:'输入 ≤ 128K tokens', officialIn:0.8, officialOut:4.8 },
+    ]
+  },
+  {
+    name:'Qwen3-235B-A22B', id:'qwen3-235b', vendor:'阿里云', billing:'text/token', costRate:0.35,
+    tiers:[
+      { label:'非思考', condition:'thinking = off', officialIn:2.0, officialOut:8.0  },
+      { label:'思考',   condition:'thinking = on',  officialIn:4.0, officialOut:16.0 },
+    ]
+  },
+  {
+    name:'Qwen3-14B', id:'qwen3-14b', vendor:'阿里云', billing:'text/token', costRate:0.35,
+    tiers:[
+      { label:'非思考', condition:'thinking = off', officialIn:1.0, officialOut:4.0 },
+      { label:'思考',   condition:'thinking = on',  officialIn:2.0, officialOut:8.0 },
+    ]
+  },
+  {
+    name:'Wan2.6-Image', id:'wan2.6-image', vendor:'阿里云', billing:'image/image', costRate:0.35,
+    tiers:[
+      { label:'按张计费', condition:'—', officialIn:0.20, officialOut:null },
+    ]
+  },
+
+  // ── DeepSeek ── 4.5–6折 bracket → C:90% B:80% R:70%
+  {
+    name:'DeepSeek-V3.2', id:'deepseek-v3', vendor:'DeepSeek', billing:'text/token', costRate:0.60,
+    tiers:[
+      { label:'标准调用', condition:'cache_hit = false', officialIn:2.0, officialOut:8.0 },
+      { label:'缓存命中', condition:'cache_hit = true',  officialIn:0.1, officialOut:8.0 },
+    ]
+  },
+
+  // ── 智谱 / 月之暗面 ── 原价 bracket → C:100% B:100% R:不开放
+  {
+    name:'GLM-5', id:'glm-5', vendor:'智谱', billing:'text/token', costRate:1.00,
+    tiers:[
+      { label:'0–32K', condition:'输入 ≤ 32K tokens', officialIn:4.0, officialOut:18 },
+    ]
+  },
+  {
+    name:'Kimi-K2.6', id:'kimi-k2.6', vendor:'月之暗面', billing:'text/token', costRate:1.00,
+    tiers:[
+      { label:'0–256K', condition:'输入 ≤ 256K tokens', officialIn:6.5, officialOut:27 },
+    ]
+  },
 ];
 
-// ── Pricing rules by cost bracket ─────────────────────────────
+// ── Pricing bracket rules ──────────────────────────────────────────────────
 function getBracket(rate) {
-  if (rate <= 0.35) return { label:'≤3.5折', c:0.80, b:0.70, r:0.60 };
-  if (rate <= 0.45) return { label:'3.5–4.5折', c:0.85, b:0.75, r:0.65 };
-  if (rate <= 0.60) return { label:'4.5–6折', c:0.90, b:0.80, r:0.70 };
-  if (rate <= 0.70) return { label:'6–7折', c:0.90, b:0.85, r:0.80 };
-  if (rate <= 0.80) return { label:'7–8折', c:0.95, b:0.90, r:0.85 };
-  if (rate <= 0.90) return { label:'8–9折', c:0.95, b:0.90, r:0.90 };
-  return { label:'原价', c:1.00, b:1.00, r:null };
+  if (rate <= 0.35) return { c:0.80, b:0.70, r:0.60 };
+  if (rate <= 0.45) return { c:0.85, b:0.75, r:0.65 };
+  if (rate <= 0.60) return { c:0.90, b:0.80, r:0.70 };
+  if (rate <= 0.70) return { c:0.90, b:0.85, r:0.80 };
+  if (rate <= 0.80) return { c:0.95, b:0.90, r:0.85 };
+  if (rate <= 0.90) return { c:0.95, b:0.90, r:0.90 };
+  return { c:1.00, b:1.00, r:null };
 }
 
 function fmt(val) {
@@ -195,9 +256,7 @@ function discPill(ratio, isReseller) {
   return `<span class="disc-pill green">${pct}%</span>`;
 }
 
-// Group models by vendor for section rows
 const VENDOR_ORDER = ['阿里云','DeepSeek','智谱','月之暗面'];
-
 let currentTpl = 'c';
 
 function renderTable() {
@@ -211,7 +270,6 @@ function renderTable() {
     m.id.toLowerCase().includes(query)
   );
 
-  // Group by vendor
   const grouped = {};
   filtered.forEach(m => {
     if (!grouped[m.vendor]) grouped[m.vendor] = [];
@@ -221,28 +279,67 @@ function renderTable() {
   let html = '';
   VENDOR_ORDER.forEach(vendor => {
     if (!grouped[vendor]) return;
-    html += `<tr class="section-row"><td colspan="8">${vendor}</td></tr>`;
+    html += `<tr class="section-row"><td colspan="9">${vendor}</td></tr>`;
+
     grouped[vendor].forEach(m => {
       const br = getBracket(m.costRate);
       const ratio = br[tpl];
       const isReseller = tpl === 'r';
-      const tplIn = (ratio !== null) ? m.officialIn * ratio : null;
-      const tplOut = (m.officialOut !== null && ratio !== null) ? m.officialOut * ratio : null;
+      const n = m.tiers.length;
 
-      html += `<tr>
-        <td><div class="td-primary">${m.name}</div><div class="td-muted td-mono">${m.id}${m.note ? ' · ' + m.note : ''}</div></td>
-        <td>${m.vendor}</td>
-        <td><div>${m.billing.split('/')[0]}</div><div class="td-muted">${m.billing.split('/')[1]}</div></td>
-        <td class="col-official"><div class="price-official">${fmt(m.officialIn)}</div></td>
-        <td class="col-official"><div class="price-official">${m.officialOut !== null ? fmt(m.officialOut) : '—'}</div></td>
-        <td><div class="price-tpl">${fmt(tplIn)}</div></td>
-        <td><div class="price-tpl">${m.officialOut !== null ? fmt(tplOut) : '—'}</div></td>
-        <td>${discPill(ratio, isReseller)}</td>
-      </tr>`;
+      m.tiers.forEach((tier, ti) => {
+        const isFirst = ti === 0;
+        const isLast  = ti === n - 1;
+        const trClass = isLast ? 'tier-last' : 'tier-mid';
+
+        const tplIn  = (ratio !== null) ? tier.officialIn * ratio : null;
+        const tplOut = (tier.officialOut !== null && ratio !== null) ? tier.officialOut * ratio : null;
+
+        let row = `<tr class="${trClass}">`;
+
+        // Model / vendor / billing — only on first tier, with rowspan
+        if (isFirst) {
+          row += `
+            <td rowspan="${n}" class="rs-cell">
+              <div class="td-primary">${m.name}</div>
+              <div class="td-muted td-mono">${m.id}</div>
+            </td>
+            <td rowspan="${n}" class="rs-cell">${m.vendor}</td>
+            <td rowspan="${n}" class="rs-cell">
+              <div>${m.billing.split('/')[0]}</div>
+              <div class="td-muted">${m.billing.split('/')[1]}</div>
+            </td>`;
+        }
+
+        // Tier condition
+        row += `
+          <td class="tier-condition">
+            <div class="tier-label">${tier.label}</div>
+            <div class="tier-cond">${tier.condition}</div>
+          </td>`;
+
+        // Official prices
+        row += `
+          <td class="col-official"><div class="price-official">${fmt(tier.officialIn)}</div></td>
+          <td class="col-official"><div class="price-official">${tier.officialOut !== null ? fmt(tier.officialOut) : '—'}</div></td>`;
+
+        // Template prices
+        row += `
+          <td><div class="price-tpl">${fmt(tplIn)}</div></td>
+          <td><div class="price-tpl">${tier.officialOut !== null ? fmt(tplOut) : '—'}</div></td>`;
+
+        // Discount — rowspan on first row only
+        if (isFirst) {
+          row += `<td rowspan="${n}" class="rs-cell">${discPill(ratio, isReseller)}</td>`;
+        }
+
+        row += '</tr>';
+        html += row;
+      });
     });
   });
 
-  body.innerHTML = html || '<tr><td colspan="8" style="text-align:center;padding:32px;color:var(--text-muted);">无匹配模型</td></tr>';
+  body.innerHTML = html || '<tr><td colspan="9" style="text-align:center;padding:32px;color:var(--text-muted);">无匹配模型</td></tr>';
 }
 
 function selectTpl(tpl) {
