@@ -55,6 +55,11 @@
 .price-official { font-size: 12px; color: var(--text-muted); }
 .price-tpl { font-size: 13px; font-weight: 600; color: var(--text); }
 
+/* ── Official price column highlight ── */
+th.col-official { background: #faf5ff; color: #7c3aed !important; }
+td.col-official { background: #fdf9ff; }
+tbody tr:hover td.col-official { background: #f5eeff; }
+
 /* ── Section label row ── */
 .section-row td {
   background: var(--bg-muted); padding: 5px 16px 4px;
@@ -134,8 +139,8 @@
         <th>模型</th>
         <th>供应商</th>
         <th>计费类型</th>
-        <th>官网原价（输入）</th>
-        <th>官网原价（输出）</th>
+        <th class="col-official">官网原价（输入）</th>
+        <th class="col-official">官网原价（输出）</th>
         <th id="th-tpl-in">本模版售价（输入）</th>
         <th id="th-tpl-out">本模版售价（输出）</th>
         <th>折扣率</th>
@@ -186,8 +191,8 @@ function fmt(val) {
 function discPill(ratio, isReseller) {
   if (isReseller && ratio === null) return '<span class="disc-pill na">不开放</span>';
   if (ratio === 1.00) return '<span class="disc-pill same">同官网</span>';
-  const pct = Math.round((1 - ratio) * 100);
-  return `<span class="disc-pill green">-${pct}%</span>`;
+  const pct = Math.round(ratio * 100);
+  return `<span class="disc-pill green">${pct}%</span>`;
 }
 
 // Group models by vendor for section rows
@@ -228,8 +233,8 @@ function renderTable() {
         <td><div class="td-primary">${m.name}</div><div class="td-muted td-mono">${m.id}${m.note ? ' · ' + m.note : ''}</div></td>
         <td>${m.vendor}</td>
         <td><div>${m.billing.split('/')[0]}</div><div class="td-muted">${m.billing.split('/')[1]}</div></td>
-        <td><div class="price-official">${fmt(m.officialIn)}</div></td>
-        <td><div class="price-official">${m.officialOut !== null ? fmt(m.officialOut) : '—'}</div></td>
+        <td class="col-official"><div class="price-official">${fmt(m.officialIn)}</div></td>
+        <td class="col-official"><div class="price-official">${m.officialOut !== null ? fmt(m.officialOut) : '—'}</div></td>
         <td><div class="price-tpl">${fmt(tplIn)}</div></td>
         <td><div class="price-tpl">${m.officialOut !== null ? fmt(tplOut) : '—'}</div></td>
         <td>${discPill(ratio, isReseller)}</td>
