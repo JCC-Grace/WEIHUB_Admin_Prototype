@@ -181,6 +181,25 @@
   border-bottom: none !important;
 }
 
+/* ── Tabs ── */
+.tab-bar {
+  display: flex; gap: 0; border-bottom: 1.5px solid var(--border);
+  margin-bottom: 16px;
+}
+.tab {
+  padding: 9px 18px; font-size: 13px; font-weight: 500;
+  color: var(--text-muted); cursor: pointer; border-bottom: 2px solid transparent;
+  margin-bottom: -1.5px; transition: color .15s, border-color .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.tab:hover { color: var(--text); }
+.tab.active { color: var(--primary); border-bottom-color: var(--primary); font-weight: 600; }
+.tab-count {
+  font-size: 11px; font-weight: 600; padding: 1px 6px;
+  border-radius: 10px; background: var(--bg-muted); color: var(--text-muted);
+}
+.tab.active .tab-count { background: #eef2ff; color: var(--primary); }
+
 /* Toast */
 .toast {
   position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-60px);
@@ -216,6 +235,16 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:14px;height:14px;margin-right:4px;vertical-align:middle"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       新建模版
     </button>
+  </div>
+</div>
+
+<!-- Tabs -->
+<div class="tab-bar">
+  <div class="tab active" id="tab-b" onclick="setTab('b')">
+    B端企业 <span class="tab-count" id="cnt-b"></span>
+  </div>
+  <div class="tab" id="tab-r" onclick="setTab('r')">
+    代理商 <span class="tab-count" id="cnt-r"></span>
   </div>
 </div>
 
@@ -410,11 +439,28 @@ let TEMPLATES = [
 ];
 let nextId = 6;
 
+// ── Tabs ─────────────────────────────────────────────────────
+let currentTab = 'b';
+
+function setTab(t) {
+  currentTab = t;
+  document.getElementById('tab-b').classList.toggle('active', t === 'b');
+  document.getElementById('tab-r').classList.toggle('active', t === 'r');
+  renderList();
+}
+
+function updateCounts() {
+  document.getElementById('cnt-b').textContent = TEMPLATES.filter(x => x.type === 'b' && x.status === 'active').length;
+  document.getElementById('cnt-r').textContent = TEMPLATES.filter(x => x.type === 'r' && x.status === 'active').length;
+}
+
 // ── List render ──────────────────────────────────────────────
 function renderList() {
+  updateCounts();
   const q = document.getElementById('searchInput').value.toLowerCase();
   const rows = TEMPLATES.filter(t =>
-    t.name.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q)
+    t.type === currentTab &&
+    (t.name.toLowerCase().includes(q) || t.customer.toLowerCase().includes(q))
   );
   const tbody = document.getElementById('listBody');
   if (!rows.length) {
@@ -465,7 +511,7 @@ function openCreate() {
   document.getElementById('fDiscount').value = 95;
   document.getElementById('fCustomer').value = '';
   document.getElementById('fNote').value = '';
-  selectType('b');
+  selectType(currentTab);
   document.getElementById('createModal').classList.add('open');
 }
 function closeCreate() {
