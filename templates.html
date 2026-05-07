@@ -313,15 +313,12 @@
       <div class="form-group">
         <label class="form-label">额外折扣<span>*</span></label>
         <div class="disc-input-row">
-          <input class="form-input short" id="fDiscount" type="number" min="50" max="100" value="95">
+          <input class="form-input short" id="fDiscount" type="number" min="50" max="100" value="95" oninput="updatePreview()">
           <span class="disc-suffix">%</span>
         </div>
         <div class="form-hint">在标准售价基础上再乘以此系数。填 95 表示额外打 9.5 折，填 100 表示与标准价相同。</div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">关联客户</label>
-        <input class="form-input" id="fCustomer" type="text" placeholder="企业名称或代理商名称（可选）">
+        <!-- Live price preview -->
+        <div id="pricePreview" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"></div>
       </div>
 
       <div class="form-group" style="margin-bottom:0">
@@ -503,14 +500,15 @@ function selectType(t) {
   selectedType = t;
   document.getElementById('rc-b').classList.toggle('selected', t === 'b');
   document.getElementById('rc-r').classList.toggle('selected', t === 'r');
+  updatePreview();
 }
 
 function openCreate() {
   document.getElementById('fName').value = '';
   document.getElementById('fDiscount').value = 95;
-  document.getElementById('fCustomer').value = '';
   document.getElementById('fNote').value = '';
   selectType(currentTab);
+  updatePreview();
   document.getElementById('createModal').classList.add('open');
 }
 function closeCreate() {
@@ -528,7 +526,7 @@ function submitCreate() {
     name,
     type: selectedType,
     discount,
-    customers: document.getElementById('fCustomer').value.trim() ? [document.getElementById('fCustomer').value.trim()] : [],
+    customers: [],
     note: document.getElementById('fNote').value.trim(),
     status: 'active',
     createdAt: new Date().toISOString().slice(0,10),
@@ -618,6 +616,64 @@ function showToast(msg) {
   document.getElementById('toastMsg').textContent = msg;
   el.classList.add('show');
   setTimeout(() => el.classList.remove('show'), 2200);
+}
+
+// ── Live price preview ────────────────────────────────────────
+// Show 3 representative models so the user can see what the discount means in real numbers
+const PREVIEW_MODELS = [
+  { name:'Qwen3-Max',     id:'qwen3-max',   vendor:'阿里云',   billing:'text', officialIn:2.5,  officialOut:10,  costRate:0.35 },
+  { name:'DeepSeek-V3.2', id:'deepseek-v3', vendor:'DeepSeek', billing:'text', officialIn:2.0,  officialOut:8.0, costRate:0.60 },
+  { name:'GLM-5',         id:'glm-5',       vendor:'智谱',     billing:'text', officialIn:4.0,  officialOut:18,  costRate:1.00 },
+];
+
+function updatePreview() {
+  const el = document.getElementById('pricePreview');
+  if (!el) return;
+  const discRaw = parseInt(document.getElementById('fDiscount')?.value, 10);
+  if (isNaN(discRaw) || discRaw < 1 || discRaw > 100) { el.innerHTML = ''; return; }
+  const extraRatio = discRaw / 100;
+  const tier = selectedType; // 'b' or 'r'
+
+  // combined effective ratio vs official
+  const rows = PREVIEW_MODELS.map(m => {
+    const br = getBracket(m.costRate);
+    const baseRatio = br[tier];
+    if (baseRatio === null) return null;
+    const stdIn  = m.officialIn  * baseRatio;
+    const stdOut = m.officialOut * baseRatio;
+    const tplIn  = stdIn  * extraRatio;
+    const tplOut = stdOut * extraRatio;
+    const effPct = Math.round(baseRatio * extraRatio * 100);
+    return { m, stdIn, stdOut, tplIn, tplOut, effPct };
+  }).filter(Boolean);
+
+  const tierLabel = tier === 'b' ? 'B端标准' : '代理商标准';
+  el.innerHTML = `
+    <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+      <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">价格预览（示例模型）</span>
+      <span style="font-size:11px;color:var(--text-muted);">${tierLabel} × ${discRaw}% 额外折扣</span>
+    </div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead>
+        <tr style="background:var(--bg-muted);">
+          <th style="padding:6px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
+          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
+          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
+          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">综合折扣</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${rows.map((r,i) => `
+          <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
+            <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.m.name}</td>
+            <td style="padding:8px 12px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
+            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--text);">${fmt(r.tplIn)}</td>
+            <td style="padding:8px 12px;text-align:right;">
+              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#dcfce7;color:#16a34a;">${r.effPct}% 官网</span>
+            </td>
+          </tr>`).join('')}
+      </tbody>
+    </table>`;
 }
 
 // Init
