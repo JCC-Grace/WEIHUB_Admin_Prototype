@@ -26,7 +26,7 @@
 .modal-backdrop.open { opacity: 1; pointer-events: all; }
 .modal-card {
   background: var(--bg); border-radius: var(--radius-lg);
-  width: 480px; max-height: 90vh; overflow-y: auto;
+  width: 560px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,.18);
   transform: translateY(10px); transition: transform .18s;
 }
@@ -181,6 +181,30 @@
   border-bottom: none !important;
 }
 
+/* ── Bracket table inside modal ── */
+.bracket-tbl { width:100%; border-collapse:collapse; font-size:12px; }
+.bracket-tbl th {
+  padding:7px 12px; text-align:left;
+  font-size:10px; font-weight:700; letter-spacing:.06em; text-transform:uppercase;
+  color:var(--text-muted); background:var(--bg-muted);
+  border-bottom:1px solid var(--border);
+}
+.bracket-tbl th.th-ref    { color:#4338ca; }
+.bracket-tbl th.th-custom { color:var(--primary); }
+.bracket-tbl td { padding:7px 12px; border-bottom:1px solid var(--border-light); vertical-align:middle; }
+.bracket-tbl tr:last-child td { border-bottom:none; }
+.b-label { font-size:12px; font-weight:600; color:var(--text); }
+.b-range { font-size:10px; color:var(--text-muted); font-family:monospace; margin-top:1px; }
+.ref-val { font-size:13px; font-weight:700; color:#4338ca; }
+.ref-na  { font-size:11px; color:var(--text-muted); font-style:italic; }
+.bracket-input {
+  width:60px; padding:4px 8px; font-size:13px; font-weight:600;
+  border:1.5px solid var(--border); border-radius:var(--radius-sm);
+  background:var(--bg); color:var(--text); outline:none; transition:border-color .15s;
+}
+.bracket-input:focus { border-color:var(--primary); }
+.bracket-input:disabled { background:var(--bg-muted); color:var(--text-muted); cursor:not-allowed; }
+
 /* ── Tabs ── */
 .tab-bar {
   display: flex; gap: 0; border-bottom: 1.5px solid var(--border);
@@ -311,12 +335,20 @@
       </div>
 
       <div class="form-group">
-        <label class="form-label">额外折扣<span>*</span></label>
-        <div class="disc-input-row">
-          <input class="form-input short" id="fDiscount" type="number" min="50" max="100" value="95" oninput="updatePreview()">
-          <span class="disc-suffix">%</span>
+        <label class="form-label">按成本区间设置售价比例<span>*</span></label>
+        <div class="form-hint" style="margin-bottom:8px;">左列为标准比例（参考），右列可逐行修改。比例直接对应官网原价，确保高于采购成本避免亏损。</div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+          <table class="bracket-tbl">
+            <thead>
+              <tr>
+                <th>成本区间</th>
+                <th class="th-ref" id="th-ref-label">标准比例</th>
+                <th class="th-custom">本模版</th>
+              </tr>
+            </thead>
+            <tbody id="bracketBody"></tbody>
+          </table>
         </div>
-        <div class="form-hint">在标准售价基础上再乘以此系数。填 95 表示额外打 9.5 折，填 100 表示与标准价相同。</div>
         <!-- Live price preview -->
         <div id="pricePreview" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"></div>
       </div>
@@ -352,7 +384,7 @@
     </div>
     <div class="drawer-meta">
       <div class="meta-item">
-        <div class="meta-label">额外折扣</div>
+        <div class="meta-label">比例范围</div>
         <div class="meta-val big" id="dDiscount"></div>
       </div>
       <div class="meta-item">
@@ -430,11 +462,14 @@ function fmt(v) {
 }
 
 // ── Templates data ──────────────────────────────────────────
+// ratios[0..5] = 6 editable brackets (≤3.5折 → 8–9折), ratios[6] = 原价 (locked)
+// B端 standard:    [70, 75, 80, 85, 90, 90, 100]
+// 代理商 standard: [60, 65, 70, 80, 85, 90, null]
 let TEMPLATES = [
-  { id:1, name:'字节跳动专属',     type:'b', discount:95, customers:['字节跳动有限公司'],                                   note:'2026 年度合同', status:'active', createdAt:'2026-03-15' },
-  { id:2, name:'腾讯云合作方案',   type:'b', discount:92, customers:['腾讯云计算（北京）有限责任公司','腾讯音乐娱乐集团'],   note:'',              status:'active', createdAt:'2026-04-02' },
-  { id:3, name:'代理商A · 方案1', type:'r', discount:90, customers:['北京某科技代理商'],                                    note:'面向小型企业',  status:'active', createdAt:'2026-04-10' },
-  { id:4, name:'代理商A · 方案2', type:'r', discount:85, customers:['北京某科技代理商','上海数聚信息技术有限公司'],          note:'面向中型企业',  status:'active', createdAt:'2026-04-10' },
+  { id:1, name:'字节跳动专属',     type:'b', ratios:[66, 71, 76, 81, 86, 86, 100], customers:['字节跳动有限公司'],                                   note:'2026 年度合同', status:'active', createdAt:'2026-03-15' },
+  { id:2, name:'腾讯云合作方案',   type:'b', ratios:[64, 69, 74, 79, 85, 85, 100], customers:['腾讯云计算（北京）有限责任公司','腾讯音乐娱乐集团'],   note:'',              status:'active', createdAt:'2026-04-02' },
+  { id:3, name:'代理商A · 方案1', type:'r', ratios:[54, 59, 63, 72, 77, 81, null], customers:['北京某科技代理商'],                                    note:'面向小型企业',  status:'active', createdAt:'2026-04-10' },
+  { id:4, name:'代理商A · 方案2', type:'r', ratios:[51, 56, 60, 68, 73, 77, null], customers:['北京某科技代理商','上海数聚信息技术有限公司'],          note:'面向中型企业',  status:'active', createdAt:'2026-04-10' },
 ];
 let nextId = 6;
 
@@ -475,8 +510,8 @@ function renderList() {
         ? '<span class="type-b">B端企业</span>'
         : '<span class="type-r">代理商</span>'}</td>
       <td>
-        <div class="disc-num">${t.discount}%</div>
-        <div class="disc-sub">${t.discount < 100 ? '额外 ' + (100 - t.discount) + '% 优惠' : '同标准价'}</div>
+        <div class="disc-num">${t.ratios[0]}%</div>
+        <div class="disc-sub">≤3.5折区间 · 官网</div>
       </td>
       <td><span style="font-size:13px;font-weight:600;color:var(--text)">${t.customers.length}</span><span style="font-size:11px;color:var(--text-muted);margin-left:3px;">家</span></td>
       <td><span style="font-size:12px;color:var(--text-muted)">${t.createdAt}</span></td>
@@ -496,6 +531,21 @@ function renderList() {
     </tr>`).join('');
 }
 
+// ── Bracket metadata (shared between modal + drawer) ──────────
+const FORM_BRACKETS = [
+  { label:'≤3.5折',    range:'[0, 3.5]',   costMax:0.35, b:70,  r:60,  locked:false },
+  { label:'3.5–4.5折', range:'(3.5, 4.5]', costMax:0.45, b:75,  r:65,  locked:false },
+  { label:'4.5–6折',   range:'(4.5, 6]',   costMax:0.60, b:80,  r:70,  locked:false },
+  { label:'6–7折',     range:'(6, 7]',      costMax:0.70, b:85,  r:80,  locked:false },
+  { label:'7–8折',     range:'(7, 8]',      costMax:0.80, b:90,  r:85,  locked:false },
+  { label:'8–9折',     range:'(8, 9]',      costMax:0.90, b:90,  r:90,  locked:false },
+  { label:'原价',       range:'(9, 10]',     costMax:1.00, b:100, r:null, locked:true  },
+];
+
+function bracketIndexFor(costRate) {
+  return FORM_BRACKETS.findIndex(br => costRate <= br.costMax);
+}
+
 // ── Create modal ──────────────────────────────────────────────
 let selectedType = 'b';
 
@@ -503,15 +553,36 @@ function selectType(t) {
   selectedType = t;
   document.getElementById('rc-b').classList.toggle('selected', t === 'b');
   document.getElementById('rc-r').classList.toggle('selected', t === 'r');
+  renderBracketTable();
+}
+
+function renderBracketTable(existingRatios) {
+  const tier = selectedType;
+  document.getElementById('th-ref-label').textContent = tier === 'b' ? 'B端标准' : '代理商标准';
+  document.getElementById('bracketBody').innerHTML = FORM_BRACKETS.map((br, i) => {
+    const refVal = br[tier];
+    const isLocked = br.locked || (tier === 'r' && refVal === null);
+    const inputVal = existingRatios ? existingRatios[i] : refVal;
+    return `<tr>
+      <td><div class="b-label">${br.label}</div><div class="b-range">${br.range}</div></td>
+      <td>${refVal !== null ? `<span class="ref-val">${refVal}%</span>` : `<span class="ref-na">不开放</span>`}</td>
+      <td>${isLocked
+        ? (refVal !== null ? `<span style="font-size:13px;font-weight:600;color:var(--text-muted)">${refVal}%</span>` : `<span class="ref-na">不开放</span>`)
+        : `<div style="display:flex;align-items:center;gap:4px;">
+             <input class="bracket-input" type="number" min="1" max="100"
+               id="bi-${i}" value="${inputVal}" oninput="updatePreview()">
+             <span style="font-size:12px;color:var(--text-muted)">%</span>
+           </div>`}
+      </td>
+    </tr>`;
+  }).join('');
   updatePreview();
 }
 
 function openCreate() {
   document.getElementById('fName').value = '';
-  document.getElementById('fDiscount').value = 95;
   document.getElementById('fNote').value = '';
   selectType(currentTab);
-  updatePreview();
   document.getElementById('createModal').classList.add('open');
 }
 function closeCreate() {
@@ -519,16 +590,15 @@ function closeCreate() {
 }
 function submitCreate() {
   const name = document.getElementById('fName').value.trim();
-  const discount = parseInt(document.getElementById('fDiscount').value);
   if (!name) { document.getElementById('fName').focus(); return; }
-  if (isNaN(discount) || discount < 50 || discount > 100) {
-    document.getElementById('fDiscount').focus(); return;
-  }
+  const ratios = FORM_BRACKETS.map((br, i) => {
+    const inp = document.getElementById(`bi-${i}`);
+    if (!inp) return br[selectedType]; // locked row
+    const v = parseInt(inp.value, 10);
+    return isNaN(v) ? br[selectedType] : v;
+  });
   TEMPLATES.push({
-    id: nextId++,
-    name,
-    type: selectedType,
-    discount,
+    id: nextId++, name, type: selectedType, ratios,
     customers: [],
     note: document.getElementById('fNote').value.trim(),
     status: 'active',
@@ -552,14 +622,16 @@ function openDrawer(id) {
     ? '<span class="badge badge-success">生效</span>'
     : '<span class="badge badge-neutral">已归档</span>';
   document.getElementById('dCustomer').textContent = t.customers.length ? t.customers.join('、') : '';
-  document.getElementById('dDiscount').textContent = t.discount + '%';
+  // Show ratio range in meta (min–max of non-null ratios)
+  const validRatios = t.ratios.filter(r => r !== null);
+  const minR = Math.min(...validRatios), maxR = Math.max(...validRatios);
+  document.getElementById('dDiscount').textContent = minR === maxR ? minR + '%' : minR + '%–' + maxR + '%';
   document.getElementById('dBase').textContent = t.type === 'b' ? '标准 B端模版' : '标准代理商模版';
   document.getElementById('dCreated').textContent = t.createdAt;
   document.getElementById('dNote').textContent = t.note || '—';
 
   // render pricing table
   const tier = t.type; // 'b' or 'r'
-  const ratio = t.discount / 100;
   const grouped = {};
   MODELS.forEach(m => {
     if (!grouped[m.vendor]) grouped[m.vendor] = [];
@@ -570,14 +642,14 @@ function openDrawer(id) {
     if (!grouped[vendor]) return;
     html += `<tr class="vendor-row"><td colspan="10">${vendor}</td></tr>`;
     grouped[vendor].forEach(m => {
-      const br = getBracket(m.costRate);
-      const baseRatio = br[tier];
-      const baseIn  = m.officialIn  * baseRatio;
-      const baseOut = m.officialOut !== null ? m.officialOut * baseRatio : null;
-      const tplIn   = baseIn  * ratio;
-      const tplOut  = baseOut !== null ? baseOut * ratio : null;
-      const basePct = Math.round(baseRatio * 100);
-      const effPct  = Math.round(baseRatio * ratio * 100);
+      const bIdx = bracketIndexFor(m.costRate);
+      const br = FORM_BRACKETS[bIdx];
+      const stdPct = br[tier];           // standard ratio as integer % (e.g. 70)
+      const tplPct = t.ratios[bIdx];     // template ratio as integer % (e.g. 66)
+      const baseIn  = stdPct !== null ? m.officialIn  * (stdPct / 100) : null;
+      const baseOut = (m.officialOut !== null && stdPct !== null) ? m.officialOut * (stdPct / 100) : null;
+      const tplIn   = tplPct !== null ? m.officialIn  * (tplPct / 100) : null;
+      const tplOut  = (m.officialOut !== null && tplPct !== null) ? m.officialOut * (tplPct / 100) : null;
       html += `<tr>
         <td>
           <div class="p-name">${m.name}</div>
@@ -590,8 +662,12 @@ function openDrawer(id) {
         <td><span class="p-base">${fmt(baseOut)}</span></td>
         <td><span class="p-tpl">${fmt(tplIn)}</span></td>
         <td><span class="p-tpl">${fmt(tplOut)}</span></td>
-        <td><span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${basePct}% 官网</span></td>
-        <td><span class="p-disc-pill">${effPct}% 官网</span></td>
+        <td>${stdPct !== null
+          ? `<span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${stdPct}% 官网</span>`
+          : `<span class="ref-na">不开放</span>`}</td>
+        <td>${tplPct !== null
+          ? `<span class="p-disc-pill">${tplPct}% 官网</span>`
+          : `<span class="ref-na">不开放</span>`}</td>
       </tr>`;
     });
   });
@@ -624,7 +700,6 @@ function showToast(msg) {
 }
 
 // ── Live price preview ────────────────────────────────────────
-// Show 3 representative models so the user can see what the discount means in real numbers
 const PREVIEW_MODELS = [
   { name:'Qwen3-Max',     id:'qwen3-max',   vendor:'阿里云',   billing:'text', officialIn:2.5,  officialOut:10,  costRate:0.35 },
   { name:'DeepSeek-V3.2', id:'deepseek-v3', vendor:'DeepSeek', billing:'text', officialIn:2.0,  officialOut:8.0, costRate:0.60 },
@@ -634,52 +709,58 @@ const PREVIEW_MODELS = [
 function updatePreview() {
   const el = document.getElementById('pricePreview');
   if (!el) return;
-  const discRaw = parseInt(document.getElementById('fDiscount')?.value, 10);
-  if (isNaN(discRaw) || discRaw < 1 || discRaw > 100) { el.innerHTML = ''; return; }
-  const extraRatio = discRaw / 100;
-  const tier = selectedType; // 'b' or 'r'
+  const tier = selectedType;
 
-  // combined effective ratio vs official
+  // Read current ratios from bracket inputs (or locked values)
+  const currentRatios = FORM_BRACKETS.map((br, i) => {
+    const inp = document.getElementById(`bi-${i}`);
+    if (!inp) return br[tier]; // locked row
+    const v = parseInt(inp.value, 10);
+    return isNaN(v) ? br[tier] : v;
+  });
+
   const rows = PREVIEW_MODELS.map(m => {
-    const br = getBracket(m.costRate);
-    const baseRatio = br[tier];
-    if (baseRatio === null) return null;
-    const stdIn  = m.officialIn  * baseRatio;
-    const stdOut = m.officialOut * baseRatio;
-    const tplIn  = stdIn  * extraRatio;
-    const tplOut = stdOut * extraRatio;
-    const basePct = Math.round(baseRatio * 100);
-    const effPct  = Math.round(baseRatio * extraRatio * 100);
-    return { m, stdIn, stdOut, tplIn, tplOut, basePct, effPct };
+    const bIdx = bracketIndexFor(m.costRate);
+    const br = FORM_BRACKETS[bIdx];
+    const stdPct = br[tier]; // standard ratio as integer %
+    const tplPct = currentRatios[bIdx];
+    if (stdPct === null) return null;
+    const stdIn  = m.officialIn  * (stdPct / 100);
+    const stdOut = m.officialOut !== null ? m.officialOut * (stdPct / 100) : null;
+    const tplIn  = m.officialIn  * (tplPct / 100);
+    const tplOut = m.officialOut !== null ? m.officialOut * (tplPct / 100) : null;
+    return { m, stdIn, stdOut, tplIn, tplOut, stdPct, tplPct };
   }).filter(Boolean);
 
   const tierLabel = tier === 'b' ? 'B端标准' : '代理商标准';
   el.innerHTML = `
     <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
       <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">价格预览（示例模型）</span>
-      <span style="font-size:11px;color:var(--text-muted);">${tierLabel} × ${discRaw}% 额外折扣</span>
+      <span style="font-size:11px;color:var(--text-muted);">与${tierLabel}对比</span>
     </div>
     <table style="width:100%;border-collapse:collapse;font-size:12px;">
       <thead>
         <tr style="background:var(--bg-muted);">
           <th style="padding:6px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
+          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">官网原价·输入</th>
           <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
           <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
           <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">${tierLabel}折扣</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">综合折扣</th>
+          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版折扣</th>
         </tr>
       </thead>
       <tbody>
         ${rows.map((r,i) => `
           <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
             <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.m.name}</td>
+            <td style="padding:8px 12px;text-align:right;color:var(--text-muted);">${fmt(r.m.officialIn)}</td>
             <td style="padding:8px 12px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
             <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--text);">${fmt(r.tplIn)}</td>
             <td style="padding:8px 12px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.basePct}% 官网</span>
+              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.stdPct}% 官网</span>
             </td>
             <td style="padding:8px 12px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#dcfce7;color:#16a34a;">${r.effPct}% 官网</span>
+              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#dcfce7;color:#16a34a;">${r.tplPct}% 官网</span>
             </td>
           </tr>`).join('')}
       </tbody>
