@@ -26,13 +26,38 @@
 .modal-backdrop.open { opacity: 1; pointer-events: all; }
 .modal-card {
   background: var(--bg); border-radius: var(--radius-lg);
-  width: 560px; max-height: 90vh; overflow-y: auto;
   box-shadow: 0 20px 60px rgba(0,0,0,.18);
   transform: translateY(10px); transition: transform .18s;
+  display: flex; flex-direction: column; overflow: hidden;
 }
 .modal-backdrop.open .modal-card { transform: translateY(0); }
+
+/* Wide variants for B2B forms */
+.modal-card.modal-xl { width: 900px; max-width: 96vw; max-height: 88vh; }
+.modal-card.modal-lg { width: 760px; max-width: 96vw; max-height: 88vh; }
+
+/* Two-column modal body */
+.modal-body-2col { display: flex; flex: 1; overflow: hidden; min-height: 0; }
+.modal-col-left {
+  width: 272px; min-width: 272px; flex-shrink: 0;
+  padding: 24px 20px 24px 24px;
+  border-right: 1px solid var(--border); overflow-y: auto;
+}
+.modal-col-right {
+  flex: 1; min-width: 0; overflow-y: auto;
+  padding: 24px 24px 24px 20px;
+  background: #fafbff;
+}
+.modal-col-right-title {
+  font-size: 11px; font-weight: 700; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--text-muted);
+  margin-bottom: 12px;
+}
+
 .modal-header {
-  padding: 20px 24px 0; display: flex; align-items: center; justify-content: space-between;
+  padding: 20px 24px 16px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  border-bottom: 1px solid var(--border);
 }
 .modal-title { font-size: 15px; font-weight: 700; }
 .modal-close {
@@ -42,9 +67,11 @@
 }
 .modal-close:hover { background: var(--bg-muted); color: var(--text); }
 .modal-close svg { width: 16px; height: 16px; }
-.modal-body { padding: 20px 24px; }
+.modal-body { padding: 20px 24px; overflow-y: auto; }
 .modal-footer {
-  padding: 0 24px 20px; display: flex; justify-content: flex-end; gap: 8px;
+  padding: 14px 24px; flex-shrink: 0;
+  display: flex; justify-content: flex-end; gap: 8px;
+  border-top: 1px solid var(--border);
 }
 
 /* ── Form ── */
@@ -302,46 +329,56 @@
 
 </main></div></div>
 
-<!-- ── Create Modal ── -->
+<!-- ── Create Modal · 新方案 ── -->
 <div class="modal-backdrop" id="createModal">
-  <div class="modal-card">
+  <div class="modal-card modal-xl">
     <div class="modal-header">
-      <div class="modal-title">新建价格模版</div>
+      <div>
+        <div class="modal-title">新建价格模版 · 新方案</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">按成本区间直接设定售价比例，避免叠加折扣导致亏损</div>
+      </div>
       <div class="modal-close" onclick="closeCreate()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
     </div>
-    <div class="modal-body">
 
-      <div class="form-group">
-        <label class="form-label">模版名称<span>*</span></label>
-        <input class="form-input" id="fName" type="text" placeholder="如：字节跳动专属方案">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">客户类型<span>*</span></label>
-        <div class="radio-group">
-          <div class="radio-card selected" id="rc-b" onclick="selectType('b')">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-label">B端企业</div>
-              <div class="radio-sub">在标准 B端价基础上议价</div>
+    <div class="modal-body-2col">
+      <!-- Left: basic fields -->
+      <div class="modal-col-left">
+        <div class="form-group">
+          <label class="form-label">模版名称<span>*</span></label>
+          <input class="form-input" id="fName" type="text" placeholder="如：字节跳动专属方案">
+        </div>
+        <div class="form-group">
+          <label class="form-label">客户类型<span>*</span></label>
+          <div class="radio-group" style="flex-direction:column;">
+            <div class="radio-card selected" id="rc-b" onclick="selectType('b')">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">B端企业</div>
+                <div class="radio-sub">在标准 B端价基础上议价</div>
+              </div>
             </div>
-          </div>
-          <div class="radio-card" id="rc-r" onclick="selectType('r')">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-label">代理商</div>
-              <div class="radio-sub">在标准代理商价基础上议价</div>
+            <div class="radio-card" id="rc-r" onclick="selectType('r')">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">代理商</div>
+                <div class="radio-sub">在标准代理商价基础上议价</div>
+              </div>
             </div>
           </div>
         </div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">备注</label>
+          <textarea class="form-input form-textarea" id="fNote" placeholder="合同编号、有效期或其他备注（可选）"></textarea>
+        </div>
       </div>
 
-      <div class="form-group">
-        <label class="form-label">按成本区间设置售价比例<span>*</span></label>
-        <div class="form-hint" style="margin-bottom:8px;">左列为标准比例（参考），右列可逐行修改。比例直接对应官网原价，确保高于采购成本避免亏损。</div>
-        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;">
+      <!-- Right: bracket table + price preview -->
+      <div class="modal-col-right">
+        <div class="modal-col-right-title">售价比例设置</div>
+        <div class="form-hint" style="margin-bottom:12px;">左列为系统标准比例（参考），右列可逐行自定义。比例直接对应官网原价，确保不低于采购成本。</div>
+        <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);">
           <table class="bracket-tbl">
             <thead>
               <tr>
@@ -353,16 +390,13 @@
             <tbody id="bracketBody"></tbody>
           </table>
         </div>
-        <!-- Live price preview -->
-        <div id="pricePreview" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"></div>
+        <div style="margin-top:20px;">
+          <div class="modal-col-right-title">价格预览（示例模型）</div>
+          <div id="pricePreview" style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);"></div>
+        </div>
       </div>
-
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">备注</label>
-        <textarea class="form-input form-textarea" id="fNote" placeholder="合同编号、有效期或其他备注（可选）"></textarea>
-      </div>
-
     </div>
+
     <div class="modal-footer">
       <button class="btn-ghost-sm" onclick="closeCreate()">取消</button>
       <button class="btn-primary-sm" onclick="submitCreate()">创建模版</button>
@@ -372,60 +406,67 @@
 
 <!-- ── Create Modal · 原方案（单一额外折扣倍率） ── -->
 <div class="modal-backdrop" id="createModalOld">
-  <div class="modal-card" style="width:480px;">
+  <div class="modal-card modal-lg">
     <div class="modal-header">
       <div>
         <div class="modal-title">新建价格模版 · 原方案</div>
-        <div style="font-size:11px;color:var(--text-muted);margin-top:3px;">在标准折扣基础上乘以额外折扣倍率</div>
+        <div style="font-size:12px;color:var(--text-muted);margin-top:3px;">在标准折扣基础上乘以额外折扣倍率</div>
       </div>
       <div class="modal-close" onclick="closeCreateOld()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </div>
     </div>
-    <div class="modal-body">
 
-      <div class="form-group">
-        <label class="form-label">模版名称<span>*</span></label>
-        <input class="form-input" id="fNameOld" type="text" placeholder="如：字节跳动专属方案">
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">客户类型<span>*</span></label>
-        <div class="radio-group">
-          <div class="radio-card selected" id="rc-b-old" onclick="selectTypeOld('b')">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-label">B端企业</div>
-              <div class="radio-sub">在标准 B端价基础上议价</div>
+    <div class="modal-body-2col">
+      <!-- Left: form fields -->
+      <div class="modal-col-left">
+        <div class="form-group">
+          <label class="form-label">模版名称<span>*</span></label>
+          <input class="form-input" id="fNameOld" type="text" placeholder="如：字节跳动专属方案">
+        </div>
+        <div class="form-group">
+          <label class="form-label">客户类型<span>*</span></label>
+          <div class="radio-group" style="flex-direction:column;">
+            <div class="radio-card selected" id="rc-b-old" onclick="selectTypeOld('b')">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">B端企业</div>
+                <div class="radio-sub">在标准 B端价基础上议价</div>
+              </div>
             </div>
-          </div>
-          <div class="radio-card" id="rc-r-old" onclick="selectTypeOld('r')">
-            <div class="radio-dot"></div>
-            <div>
-              <div class="radio-label">代理商</div>
-              <div class="radio-sub">在标准代理商价基础上议价</div>
+            <div class="radio-card" id="rc-r-old" onclick="selectTypeOld('r')">
+              <div class="radio-dot"></div>
+              <div>
+                <div class="radio-label">代理商</div>
+                <div class="radio-sub">在标准代理商价基础上议价</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div class="form-group">
-        <label class="form-label">额外折扣<span>*</span></label>
-        <div class="disc-input-row">
-          <input class="form-input short" id="fDiscountOld" type="number" min="1" max="100"
-            placeholder="95" oninput="updatePreviewOld()">
-          <span class="disc-suffix">%（在标准价基础上再打折）</span>
+        <div class="form-group">
+          <label class="form-label">额外折扣<span>*</span></label>
+          <div class="disc-input-row">
+            <input class="form-input short" id="fDiscountOld" type="number" min="1" max="100"
+              placeholder="95" oninput="updatePreviewOld()">
+            <span class="disc-suffix">%</span>
+          </div>
+          <div class="form-hint">客户价 = 标准价 × 此比例</div>
         </div>
-        <div class="form-hint">例如填 95，则客户实际价格 = 标准价 × 95%</div>
-        <!-- Live preview -->
-        <div id="pricePreviewOld" style="margin-top:10px;border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;"></div>
+        <div class="form-group" style="margin-bottom:0">
+          <label class="form-label">备注</label>
+          <textarea class="form-input form-textarea" id="fNoteOld" placeholder="合同编号、有效期或其他备注（可选）"></textarea>
+        </div>
       </div>
 
-      <div class="form-group" style="margin-bottom:0">
-        <label class="form-label">备注</label>
-        <textarea class="form-input form-textarea" id="fNoteOld" placeholder="合同编号、有效期或其他备注（可选）"></textarea>
+      <!-- Right: live price preview -->
+      <div class="modal-col-right">
+        <div class="modal-col-right-title">价格预览</div>
+        <div id="pricePreviewOld">
+          <div style="padding:40px 0;text-align:center;color:var(--text-muted);font-size:13px;">
+            在左侧输入额外折扣比例后，此处显示各模型价格对比
+          </div>
+        </div>
       </div>
-
     </div>
     <div class="modal-footer">
       <button class="btn-ghost-sm" onclick="closeCreateOld()">取消</button>
@@ -817,37 +858,39 @@ function updatePreview() {
 
   const tierLabel = tier === 'b' ? 'B端标准' : '代理商标准';
   el.innerHTML = `
-    <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">价格预览（示例模型）</span>
-      <span style="font-size:11px;color:var(--text-muted);">与${tierLabel}对比</span>
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-      <thead>
-        <tr style="background:var(--bg-muted);">
-          <th style="padding:6px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">官网原价·输入</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">${tierLabel}折扣</th>
-          <th style="padding:6px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版折扣</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r,i) => `
-          <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
-            <td style="padding:8px 12px;color:var(--text);font-weight:500;">${r.m.name}</td>
-            <td style="padding:8px 12px;text-align:right;color:var(--text-muted);">${fmt(r.m.officialIn)}</td>
-            <td style="padding:8px 12px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
-            <td style="padding:8px 12px;text-align:right;font-weight:600;color:var(--text);">${fmt(r.tplIn)}</td>
-            <td style="padding:8px 12px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.stdPct}% 官网</span>
-            </td>
-            <td style="padding:8px 12px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#dcfce7;color:#16a34a;">${r.tplPct}% 官网</span>
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>`;
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);">
+      <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">3 个示例模型</span>
+        <span style="font-size:11px;color:var(--text-muted);">与${tierLabel}对比</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--bg-muted);">
+            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">官网原价·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">${tierLabel}折扣</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版折扣</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,i) => `
+            <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
+              <td style="padding:10px 12px;color:var(--text);font-weight:500;">${r.m.name}<br><span style="font-size:10px;color:var(--text-muted);font-family:monospace">${r.m.id}</span></td>
+              <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${fmt(r.m.officialIn)}</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;color:var(--text);">${fmt(r.tplIn)}</td>
+              <td style="padding:10px 12px;text-align:right;">
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.stdPct}% 官网</span>
+              </td>
+              <td style="padding:10px 12px;text-align:right;">
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:#dcfce7;color:#16a34a;">${r.tplPct}% 官网</span>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+    </div>`;
 }
 
 // ── Create modal · 原方案 ──────────────────────────────────────
@@ -915,38 +958,42 @@ function updatePreviewOld() {
 
   const tierLabel = tier === 'b' ? 'B端标准' : '代理商标准';
   el.innerHTML = `
-    <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
-      <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">价格预览（示例模型）</span>
-      <span style="font-size:11px;color:var(--text-muted);">${tierLabel} × ${discRaw}% 额外折扣</span>
-    </div>
-    <table style="width:100%;border-collapse:collapse;font-size:12px;">
-      <thead>
-        <tr style="background:var(--bg-muted);">
-          <th style="padding:6px 10px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
-          <th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
-          <th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
-          <th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">${tierLabel}折扣</th>
-          <th style="padding:6px 10px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">综合折扣</th>
-        </tr>
-      </thead>
-      <tbody>
-        ${rows.map((r,i) => `
-          <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
-            <td style="padding:7px 10px;color:var(--text);font-weight:500;">${r.m.name}</td>
-            <td style="padding:7px 10px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
-            <td style="padding:7px 10px;text-align:right;font-weight:600;color:${r.belowCost ? '#dc2626' : 'var(--text)'};">
-              ${fmt(r.tplIn)}${r.belowCost ? ' ⚠️' : ''}
-            </td>
-            <td style="padding:7px 10px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.basePct}% 官网</span>
-            </td>
-            <td style="padding:7px 10px;text-align:right;">
-              <span style="font-size:11px;font-weight:700;padding:1px 6px;border-radius:3px;background:${r.belowCost ? '#fee2e2' : '#dcfce7'};color:${r.belowCost ? '#dc2626' : '#16a34a'};">${r.effPct}% 官网</span>
-            </td>
-          </tr>`).join('')}
-      </tbody>
-    </table>
-    ${rows.some(r => r.belowCost) ? `<div style="padding:8px 12px;font-size:11px;color:#dc2626;background:#fff8f8;border-top:1px solid #fecaca;">⚠️ 部分模型综合折扣低于采购成本比例，将产生亏损</div>` : ''}`;
+    <div style="border:1px solid var(--border);border-radius:var(--radius-sm);overflow:hidden;background:var(--bg);">
+      <div style="background:var(--bg-muted);padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;">
+        <span style="font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);">3 个示例模型</span>
+        <span style="font-size:11px;color:var(--text-muted);">${tierLabel} × ${discRaw}%</span>
+      </div>
+      <table style="width:100%;border-collapse:collapse;font-size:12px;">
+        <thead>
+          <tr style="background:var(--bg-muted);">
+            <th style="padding:8px 12px;text-align:left;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">模型</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">官网原价·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">标准价·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">本模版·输入</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">${tierLabel}折扣</th>
+            <th style="padding:8px 12px;text-align:right;font-size:10px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);border-bottom:1px solid var(--border);">综合折扣</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map((r,i) => `
+            <tr style="${i < rows.length-1 ? 'border-bottom:1px solid var(--border-light)' : ''}">
+              <td style="padding:10px 12px;color:var(--text);font-weight:500;">${r.m.name}<br><span style="font-size:10px;color:var(--text-muted);font-family:monospace">${r.m.id}</span></td>
+              <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${fmt(r.m.officialIn)}</td>
+              <td style="padding:10px 12px;text-align:right;color:var(--text-muted);">${fmt(r.stdIn)}</td>
+              <td style="padding:10px 12px;text-align:right;font-weight:600;color:${r.belowCost ? '#dc2626' : 'var(--text)'};">
+                ${fmt(r.tplIn)}${r.belowCost ? ' ⚠️' : ''}
+              </td>
+              <td style="padding:10px 12px;text-align:right;">
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:#eef2ff;color:#4338ca;">${r.basePct}% 官网</span>
+              </td>
+              <td style="padding:10px 12px;text-align:right;">
+                <span style="font-size:11px;font-weight:700;padding:2px 7px;border-radius:3px;background:${r.belowCost ? '#fee2e2' : '#dcfce7'};color:${r.belowCost ? '#dc2626' : '#16a34a'};">${r.effPct}% 官网</span>
+              </td>
+            </tr>`).join('')}
+        </tbody>
+      </table>
+      ${rows.some(r => r.belowCost) ? `<div style="padding:10px 12px;font-size:12px;color:#dc2626;background:#fff8f8;border-top:1px solid #fecaca;display:flex;align-items:center;gap:6px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px;flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>部分模型综合折扣低于采购成本比例，将产生亏损</div>` : ''}
+    </div>`;
 }
 
 // Init
