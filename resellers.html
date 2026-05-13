@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>代理商管理 — WeiHub Admin</title>
+<link rel="stylesheet" href="css/style.css">
+<style>
+/* ── Stats row ── */
+.stats-row { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:24px; }
+.stat-card { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:20px; }
+.stat-card .stat-label { font-size:13px; color:var(--text-muted); margin-bottom:6px; }
+.stat-card .stat-value { font-size:22px; font-weight:700; color:var(--text); }
+.stat-card .stat-value.green { color:#059669; }
+
+/* ── Filter bar ── */
+.filter-bar { background:#fff; border:1px solid var(--border); border-radius:var(--radius); padding:16px; margin-bottom:20px; display:flex; gap:12px; flex-wrap:wrap; align-items:flex-end; }
+.filter-bar input, .filter-bar select { height:36px; padding:0 12px; border:1.5px solid var(--border); border-radius:8px; font-size:13px; color:var(--text); background:#fff; outline:none; }
+.filter-bar input { flex:1; min-width:200px; }
+.filter-bar input:focus, .filter-bar select:focus { border-color:var(--primary); }
+.filter-bar select { padding-right:28px; appearance:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; background-size:14px; }
+.filter-bar .btn-search { height:36px; padding:0 18px; background:var(--primary); color:#fff; border-radius:8px; font-size:13px; font-weight:500; border:none; cursor:pointer; }
+.filter-bar .btn-search:hover { background:var(--primary-hover); }
+
+/* ── Badges ── */
+.badge { display:inline-flex; align-items:center; padding:2px 9px; border-radius:999px; font-size:12px; font-weight:500; white-space:nowrap; }
+.badge-pending  { background:#fffbeb; color:#92400e; border:1px solid #fcd34d; }
+.badge-active   { background:#ecfdf5; color:#065f46; border:1px solid #6ee7b7; }
+.badge-banned   { background:#fef2f2; color:#991b1b; border:1px solid #fca5a5; }
+.badge-standard { background:#f3f4f6; color:#374151; border:1px solid #d1d5db; }
+.badge-custom   { background:#eff6ff; color:#1d4ed8; border:1px solid #93c5fd; }
+
+/* ── Amounts ── */
+.amount { font-variant-numeric:tabular-nums; text-align:right; display:block; }
+.amount.green { color:#059669; }
+
+/* ── Action links ── */
+.action-link { font-size:12px; cursor:pointer; white-space:nowrap; }
+.action-link.green { color:#059669; } .action-link.green:hover { color:#047857; }
+.action-link.red   { color:#dc2626; } .action-link.red:hover   { color:#b91c1c; }
+.action-link.blue  { color:#2563eb; } .action-link.blue:hover  { color:#1d4ed8; }
+
+/* ── Modal base ── */
+.modal-mask { position:fixed; inset:0; background:rgba(0,0,0,.45); z-index:1000; display:flex; align-items:center; justify-content:center; }
+.modal-box  { background:#fff; border-radius:12px; width:480px; max-width:calc(100vw - 32px); box-shadow:0 8px 40px rgba(0,0,0,.18); }
+.modal-box.modal-md { width:560px; }
+.modal-header { display:flex; align-items:center; justify-content:space-between; padding:20px 24px 0; }
+.modal-header h3 { font-size:16px; font-weight:600; margin:0; }
+.modal-close { width:28px; height:28px; border:none; background:none; cursor:pointer; color:#888; display:flex; align-items:center; justify-content:center; border-radius:6px; }
+.modal-close:hover { background:#f3f4f6; }
+.modal-sub { font-size:13px; color:#888; padding:4px 24px 0; }
+.modal-body { padding:20px 24px; }
+.modal-footer { display:flex; justify-content:flex-end; gap:10px; padding:0 24px 20px; }
+
+/* ── Form elements ── */
+.form-grid { display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.form-field { display:flex; flex-direction:column; gap:5px; }
+.form-field label { font-size:13px; font-weight:500; color:var(--text); }
+.form-field label .req { color:#ef4444; }
+.form-field input, .form-field select, .form-field textarea {
+  padding:8px 12px; border:1.5px solid var(--border); border-radius:8px;
+  font-size:13px; color:var(--text); background:#fff; outline:none;
+}
+.form-field input:focus, .form-field select:focus, .form-field textarea:focus { border-color:var(--primary); }
+.form-field textarea { resize:vertical; min-height:72px; }
+.form-field select { appearance:none; background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 24 24' fill='none' stroke='%239ca3af' stroke-width='2' xmlns='http://www.w3.org/2000/svg'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E"); background-repeat:no-repeat; background-position:right 8px center; background-size:14px; padding-right:28px; }
+.form-hint { font-size:12px; color:var(--text-muted); margin-top:2px; }
+
+/* ── Radio group ── */
+.radio-group { display:flex; flex-direction:column; gap:8px; }
+.radio-item { display:flex; align-items:flex-start; gap:10px; padding:12px 14px; border:1.5px solid var(--border); border-radius:8px; cursor:pointer; transition:border-color .15s,background .15s; }
+.radio-item:hover { border-color:#a5b4fc; background:#fafafe; }
+.radio-item.selected { border-color:#6366f1; background:#f5f3ff; }
+.radio-item input[type=radio] { margin-top:2px; accent-color:#6366f1; flex-shrink:0; }
+.radio-label { font-size:13px; font-weight:500; color:#111; }
+.radio-desc  { font-size:12px; color:#888; margin-top:2px; }
+
+/* ── Alert ── */
+.alert-box { padding:10px 14px; border-radius:8px; font-size:13px; margin-bottom:14px; }
+.alert-warning { background:#fffbeb; border:1px solid #fcd34d; color:#92400e; display:flex; gap:8px; align-items:flex-start; }
+.alert-danger  { background:#fef2f2; border:1px solid #fca5a5; color:#991b1b; }
+.alert-box svg { flex-shrink:0; margin-top:1px; }
+
+/* ── Btn ── */
+.btn { height:36px; padding:0 18px; border-radius:8px; font-size:13px; font-weight:500; cursor:pointer; display:inline-flex; align-items:center; gap:6px; }
+.btn-primary   { background:var(--primary); color:#fff; border:none; }
+.btn-primary:hover { background:var(--primary-hover); }
+.btn-danger    { background:#dc2626; color:#fff; border:none; }
+.btn-danger:hover { background:#b91c1c; }
+.btn-outline   { background:#fff; color:var(--text-secondary); border:1.5px solid var(--border); }
+.btn-outline:hover { background:#f9fafb; }
+.btn-outline-danger { background:#fff; color:#dc2626; border:1.5px solid #fca5a5; }
+.btn-outline-danger:hover { background:#fef2f2; }
+
+/* ── Info card ── */
+.info-card { background:#f9fafb; border:1px solid var(--border); border-radius:8px; padding:12px 16px; margin-bottom:14px; }
+.info-card .ic-name { font-size:14px; font-weight:600; }
+.info-card .ic-sub  { font-size:12px; color:var(--text-muted); margin-top:2px; }
+</style>
+</head>
+<body>
+<div class="app">
+<div id="sidebar-mount"></div>
+<div class="main">
+
+<header class="header">
+  <div class="header-title">代理商管理</div>
+  <div class="header-actions">
+    <div class="header-tag">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" style="width:13px;height:13px"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>Root
+    </div>
+  </div>
+</header>
+
+<main class="page">
+
+<!-- Page Header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <h1>代理商管理</h1>
+    <div class="subtitle">共 5 个代理商，管理拿货价、账单与权限</div>
+  </div>
+  <div class="page-header-actions">
+    <button class="btn btn-primary" onclick="openCreate()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="14" height="14"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      新建代理商
+    </button>
+  </div>
+</div>
+
+<!-- KPI Stats -->
+<div class="stats-row">
+  <div class="stat-card">
+    <div class="stat-label">活跃代理商（本月有调用）</div>
+    <div class="stat-value">3</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">本月渠道流水（拿货价计）</div>
+    <div class="stat-value">¥12,480</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">本月渠道毛利</div>
+    <div class="stat-value green">¥2,890</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">累计终端客户</div>
+    <div class="stat-value">247</div>
+  </div>
+</div>
+
+<!-- Filter Bar -->
+<div class="filter-bar">
+  <input type="text" id="searchInput" placeholder="搜索代理商名称、ID 或邮箱..." />
+  <select id="statusFilter" onchange="applyFilter()">
+    <option value="">全部状态</option>
+    <option value="pending">待审核</option>
+    <option value="active">正常</option>
+    <option value="banned">封禁</option>
+  </select>
+  <select id="typeFilter" onchange="applyFilter()">
+    <option value="">全部类型</option>
+    <option value="standard">通用</option>
+    <option value="custom">定制</option>
+  </select>
+  <button class="btn-search" onclick="applyFilter()">搜索</button>
+</div>
+
+<!-- Table -->
+<div class="table-wrap">
+  <table id="resellerTable">
+    <thead>
+      <tr>
+        <th>代理商</th>
+        <th>联系方式</th>
+        <th class="text-center">类型</th>
+        <th class="text-center">状态</th>
+        <th class="text-right">账户余额</th>
+        <th class="text-right">本月用量</th>
+        <th class="text-right">本月毛利</th>
+        <th>创建时间</th>
+        <th>操作</th>
+      </tr>
+    </thead>
+    <tbody id="resellerTbody"></tbody>
+  </table>
+</div>
+
+</main>
+</div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 审核通过
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="approveModal" style="display:none" onclick="if(event.target===this)closeModal('approveModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>审核通过</h3>
+      <button class="modal-close" onclick="closeModal('approveModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-sub" id="approveModalSub"></div>
+    <div class="modal-body">
+      <div style="margin-bottom:14px;">
+        <div style="font-size:13px;font-weight:500;margin-bottom:10px;">代理商类型</div>
+        <div class="radio-group">
+          <label class="radio-item selected" id="radioStandard" onclick="selectApproveType('standard')">
+            <input type="radio" name="approveType" value="standard" checked>
+            <div><div class="radio-label">通用代理商</div><div class="radio-desc">系统自动按折扣区间套用标准拿货价，无需额外配置</div></div>
+          </label>
+          <label class="radio-item" id="radioCustom" onclick="selectApproveType('custom')">
+            <input type="radio" name="approveType" value="custom">
+            <div><div class="radio-label">定制代理商</div><div class="radio-desc">需手动在定价方案 Tab 中逐模型配置专属拿货价</div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('approveModal')">取消</button>
+      <button class="btn btn-primary" onclick="doApprove()">确认通过</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 拒绝
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="rejectModal" style="display:none" onclick="if(event.target===this)closeModal('rejectModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>拒绝申请</h3>
+      <button class="modal-close" onclick="closeModal('rejectModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-sub" id="rejectModalSub"></div>
+    <div class="modal-body">
+      <div class="form-field">
+        <label>拒绝原因 <span class="req">*</span></label>
+        <textarea id="rejectReason" rows="3" placeholder="请说明拒绝原因，该原因将通过邮件告知申请人"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('rejectModal')">取消</button>
+      <button class="btn btn-outline-danger" onclick="doReject()">确认拒绝</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 封禁
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="banModal" style="display:none" onclick="if(event.target===this)closeModal('banModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>封禁代理商</h3>
+      <button class="modal-close" onclick="closeModal('banModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-sub" id="banModalSub"></div>
+    <div class="modal-body">
+      <div class="alert-box alert-warning" style="margin-bottom:14px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><polygon points="12 2 22 21 2 21"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        封禁后该代理商账号立即无法登录，其名下所有 API Key 调用将返回 403。
+      </div>
+      <div class="form-field">
+        <label>封禁原因 <span class="req">*</span></label>
+        <textarea id="banReason" rows="3" placeholder="请填写封禁原因，便于后续审计"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('banModal')">取消</button>
+      <button class="btn btn-danger" onclick="doBan()">确认封禁</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 解封
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="unbanModal" style="display:none" onclick="if(event.target===this)closeModal('unbanModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>解除封禁</h3>
+      <button class="modal-close" onclick="closeModal('unbanModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-sub" id="unbanModalSub"></div>
+    <div class="modal-body">
+      <div id="unbanBanReason" class="info-card" style="margin-bottom:14px;"></div>
+      <div class="form-field">
+        <label>解封备注（可选）</label>
+        <textarea id="unbanReason" rows="2" placeholder="核实完毕，已确认合规..."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('unbanModal')">取消</button>
+      <button class="btn btn-primary" onclick="doUnban()">确认解封</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 手动充值
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="topupModal" style="display:none" onclick="if(event.target===this)closeModal('topupModal')">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>手动充值</h3>
+      <button class="modal-close" onclick="closeModal('topupModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="info-card" id="topupInfoCard" style="margin-bottom:16px;"></div>
+      <div class="form-field" style="margin-bottom:14px;">
+        <label>充值金额（元）<span class="req">*</span></label>
+        <input type="number" id="topupAmount" min="0.01" step="0.01" placeholder="100.00" />
+      </div>
+      <div class="form-field">
+        <label>备注</label>
+        <input type="text" id="topupRemark" placeholder="线下转账 ¥100，2026-05-12" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('topupModal')">取消</button>
+      <button class="btn btn-primary" onclick="doTopup()">确认充值</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════════
+     MODAL: 新建代理商
+════════════════════════════════════════════════════════════ -->
+<div class="modal-mask" id="createModal" style="display:none" onclick="if(event.target===this)closeModal('createModal')">
+  <div class="modal-box modal-md">
+    <div class="modal-header">
+      <h3>新建代理商</h3>
+      <button class="modal-close" onclick="closeModal('createModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="16" height="16"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="form-grid" style="margin-bottom:14px;">
+        <div class="form-field">
+          <label>代理商名称 <span class="req">*</span></label>
+          <input type="text" id="createName" placeholder="ACME API" />
+        </div>
+        <div class="form-field">
+          <label>公司名称</label>
+          <input type="text" id="createCompany" placeholder="ACME 科技有限公司" />
+        </div>
+        <div class="form-field">
+          <label>联系人</label>
+          <input type="text" id="createContact" placeholder="张三" />
+        </div>
+        <div class="form-field">
+          <label>邮箱 <span class="req">*</span></label>
+          <input type="email" id="createEmail" placeholder="contact@acme.com" />
+        </div>
+        <div class="form-field">
+          <label>手机</label>
+          <input type="text" id="createPhone" placeholder="13800000000" />
+        </div>
+        <div class="form-field">
+          <label>代理类型</label>
+          <select id="createType">
+            <option value="standard">通用</option>
+            <option value="custom">定制</option>
+          </select>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--text-muted);">
+        新建后状态为「正常」，系统自动生成账号并发送邀请邮件至填写邮箱。
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('createModal')">取消</button>
+      <button class="btn btn-primary" onclick="doCreate()">创建代理商</button>
+    </div>
+  </div>
+</div>
+
+<script src="js/sidebar.js"></script>
+<script src="js/common.js"></script>
+<script>
+// ── Mock data ──────────────────────────────────────────────────────────────
+var RESELLERS = [
+  { id:1, name:'微科技代理商', company:'北京微科技有限公司', contact:'王磊', email:'wlei@weike.com', type:'custom',   status:'active',  balance:'¥4,200', monthly_usage:'¥8,320', monthly_profit:'¥1,740', created:'2026-01-15', ban_reason:'' },
+  { id:2, name:'华政科技代理商', company:'上海华政科技公司', contact:'陈明', email:'cm@huazheng.com', type:'standard', status:'active',  balance:'¥890',   monthly_usage:'¥2,640', monthly_profit:'¥590',  created:'2026-02-03', ban_reason:'' },
+  { id:3, name:'东方云代理商',   company:'广州东方云科技', contact:'刘洋',   email:'ly@dfyun.cn',    type:'standard', status:'active',  balance:'¥310',   monthly_usage:'¥1,520', monthly_profit:'¥340',  created:'2026-03-20', ban_reason:'' },
+  { id:4, name:'星辰科技',       company:'深圳星辰科技',   contact:'赵峰',   email:'zfeng@xc.tech',  type:'standard', status:'pending', balance:'¥0',     monthly_usage:'¥0',     monthly_profit:'¥0',    created:'2026-05-10', ban_reason:'' },
+  { id:5, name:'创联网络',       company:'成都创联网络',   contact:'吴娟',   email:'wujuan@cl.net',  type:'custom',   status:'banned',  balance:'¥120',   monthly_usage:'¥0',     monthly_profit:'¥0',    created:'2026-02-28', ban_reason:'低价倾销，损害平台品牌定价体系' },
+];
+
+var currentIdx = -1;
+var approveType = 'standard';
+
+// ── Render ─────────────────────────────────────────────────────────────────
+function statusBadge(s) {
+  if (s === 'pending') return '<span class="badge badge-pending">待审核</span>';
+  if (s === 'active')  return '<span class="badge badge-active">正常</span>';
+  return '<span class="badge badge-banned">封禁</span>';
+}
+function typeBadge(t) {
+  return t === 'custom'
+    ? '<span class="badge badge-custom">定制</span>'
+    : '<span class="badge badge-standard">通用</span>';
+}
+function actionsFor(r, idx) {
+  var btns = [];
+  if (r.status === 'pending') {
+    btns.push('<a href="#" class="action-link green" onclick="openApprove('+idx+');return false;">通过</a>');
+    btns.push('<a href="#" class="action-link red"   onclick="openReject('+idx+');return false;">拒绝</a>');
+  }
+  if (r.status === 'active') {
+    btns.push('<a href="#" class="action-link blue"  onclick="openTopup('+idx+');return false;">充值</a>');
+    btns.push('<a href="#" class="action-link red"   onclick="openBan('+idx+');return false;">封禁</a>');
+  }
+  if (r.status === 'banned') {
+    btns.push('<a href="#" class="action-link green" onclick="openUnban('+idx+');return false;">解封</a>');
+  }
+  return '<div class="flex gap-2">' + btns.join('') + '</div>';
+}
+
+function renderTable(data) {
+  var tbody = document.getElementById('resellerTbody');
+  if (!data.length) {
+    tbody.innerHTML = '<tr><td colspan="9" style="text-align:center;color:var(--text-muted);padding:32px;">暂无代理商数据</td></tr>';
+    return;
+  }
+  tbody.innerHTML = data.map(function(r, idx) {
+    return '<tr>' +
+      '<td><div class="td-primary">'+r.name+'</div><div class="td-muted" style="font-size:12px;">'+r.company+'</div></td>' +
+      '<td><div>'+r.contact+'</div><div class="td-muted" style="font-size:12px;">'+r.email+'</div></td>' +
+      '<td class="text-center">'+typeBadge(r.type)+'</td>' +
+      '<td class="text-center">'+statusBadge(r.status)+'</td>' +
+      '<td><span class="amount">'+r.balance+'</span></td>' +
+      '<td><span class="amount">'+r.monthly_usage+'</span></td>' +
+      '<td><span class="amount green">'+r.monthly_profit+'</span></td>' +
+      '<td class="td-muted" style="white-space:nowrap;font-size:12px;">'+r.created+'</td>' +
+      '<td>'+actionsFor(r, idx)+'</td>' +
+    '</tr>';
+  }).join('');
+}
+
+function applyFilter() {
+  var q       = document.getElementById('searchInput').value.toLowerCase();
+  var status  = document.getElementById('statusFilter').value;
+  var type    = document.getElementById('typeFilter').value;
+  var result  = RESELLERS.filter(function(r) {
+    var matchQ = !q || r.name.toLowerCase().includes(q) || r.email.toLowerCase().includes(q) || String(r.id).includes(q);
+    var matchS = !status || r.status === status;
+    var matchT = !type   || r.type   === type;
+    return matchQ && matchS && matchT;
+  });
+  renderTable(result);
+}
+
+renderTable(RESELLERS);
+
+// ── Modal helpers ──────────────────────────────────────────────────────────
+function closeModal(id) { document.getElementById(id).style.display = 'none'; }
+function openModal(id)  { document.getElementById(id).style.display = 'flex'; }
+
+// ── Approve ────────────────────────────────────────────────────────────────
+function openApprove(idx) {
+  currentIdx = idx;
+  approveType = 'standard';
+  document.getElementById('approveModalSub').textContent = RESELLERS[idx].name + '（' + RESELLERS[idx].email + '）';
+  document.getElementById('radioStandard').classList.add('selected');
+  document.getElementById('radioCustom').classList.remove('selected');
+  document.getElementById('radioStandard').querySelector('input').checked = true;
+  openModal('approveModal');
+}
+function selectApproveType(t) {
+  approveType = t;
+  document.getElementById('radioStandard').classList.toggle('selected', t === 'standard');
+  document.getElementById('radioCustom').classList.toggle('selected',   t === 'custom');
+}
+function doApprove() {
+  RESELLERS[currentIdx].status = 'active';
+  RESELLERS[currentIdx].type   = approveType;
+  closeModal('approveModal');
+  applyFilter();
+}
+
+// ── Reject ─────────────────────────────────────────────────────────────────
+function openReject(idx) {
+  currentIdx = idx;
+  document.getElementById('rejectModalSub').textContent = RESELLERS[idx].name + '（' + RESELLERS[idx].email + '）';
+  document.getElementById('rejectReason').value = '';
+  openModal('rejectModal');
+}
+function doReject() {
+  var reason = document.getElementById('rejectReason').value.trim();
+  if (!reason) { alert('请填写拒绝原因'); return; }
+  RESELLERS.splice(currentIdx, 1); // remove from list after reject
+  closeModal('rejectModal');
+  applyFilter();
+}
+
+// ── Ban ────────────────────────────────────────────────────────────────────
+function openBan(idx) {
+  currentIdx = idx;
+  document.getElementById('banModalSub').textContent = RESELLERS[idx].name;
+  document.getElementById('banReason').value = '';
+  openModal('banModal');
+}
+function doBan() {
+  var reason = document.getElementById('banReason').value.trim();
+  if (!reason) { alert('请填写封禁原因'); return; }
+  RESELLERS[currentIdx].status     = 'banned';
+  RESELLERS[currentIdx].ban_reason = reason;
+  closeModal('banModal');
+  applyFilter();
+}
+
+// ── Unban ──────────────────────────────────────────────────────────────────
+function openUnban(idx) {
+  currentIdx = idx;
+  var r = RESELLERS[idx];
+  document.getElementById('unbanModalSub').textContent = r.name;
+  document.getElementById('unbanBanReason').innerHTML =
+    '<div style="font-size:12px;color:var(--text-muted);margin-bottom:2px;">封禁原因</div>' +
+    '<div style="font-size:13px;">' + (r.ban_reason || '—') + '</div>';
+  document.getElementById('unbanReason').value = '';
+  openModal('unbanModal');
+}
+function doUnban() {
+  RESELLERS[currentIdx].status     = 'active';
+  RESELLERS[currentIdx].ban_reason = '';
+  closeModal('unbanModal');
+  applyFilter();
+}
+
+// ── Top-up ─────────────────────────────────────────────────────────────────
+function openTopup(idx) {
+  currentIdx = idx;
+  var r = RESELLERS[idx];
+  document.getElementById('topupInfoCard').innerHTML =
+    '<div class="ic-name">'+r.name+'</div>' +
+    '<div class="ic-sub">当前余额：'+r.balance+'</div>';
+  document.getElementById('topupAmount').value  = '';
+  document.getElementById('topupRemark').value  = '';
+  openModal('topupModal');
+}
+function doTopup() {
+  var amount = parseFloat(document.getElementById('topupAmount').value);
+  if (!amount || amount <= 0) { alert('请输入有效的充值金额（正数）'); return; }
+  // In real impl, would call API; here just update the display
+  var r = RESELLERS[currentIdx];
+  var current = parseFloat(r.balance.replace(/[¥,]/g, '')) || 0;
+  r.balance = '¥' + (current + amount).toLocaleString('zh-CN', { minimumFractionDigits:0, maximumFractionDigits:0 });
+  closeModal('topupModal');
+  applyFilter();
+}
+
+// ── Create ─────────────────────────────────────────────────────────────────
+function openCreate() {
+  document.getElementById('createName').value    = '';
+  document.getElementById('createCompany').value = '';
+  document.getElementById('createContact').value = '';
+  document.getElementById('createEmail').value   = '';
+  document.getElementById('createPhone').value   = '';
+  document.getElementById('createType').value    = 'standard';
+  openModal('createModal');
+}
+function doCreate() {
+  var name  = document.getElementById('createName').value.trim();
+  var email = document.getElementById('createEmail').value.trim();
+  if (!name)  { alert('请填写代理商名称'); return; }
+  if (!email) { alert('请填写邮箱'); return; }
+  var now = new Date();
+  var dateStr = now.getFullYear()+'-'+ String(now.getMonth()+1).padStart(2,'0')+'-'+ String(now.getDate()).padStart(2,'0');
+  RESELLERS.unshift({
+    id: RESELLERS.length + 1,
+    name:    name,
+    company: document.getElementById('createCompany').value.trim(),
+    contact: document.getElementById('createContact').value.trim(),
+    email:   email,
+    type:    document.getElementById('createType').value,
+    status:  'active',
+    balance: '¥0',
+    monthly_usage:  '¥0',
+    monthly_profit: '¥0',
+    created: dateStr,
+    ban_reason: ''
+  });
+  closeModal('createModal');
+  applyFilter();
+}
+</script>
+</body>
+</html>
